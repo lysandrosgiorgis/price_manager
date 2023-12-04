@@ -91,6 +91,9 @@
                 <a href="{{ route('competition.company') }}" class="menu-link child-link">
                     {{ __('Companies') }}
                 </a>
+                <a href="{{ route('competition.product') }}" class="menu-link child-link">
+                    {{ __('Products') }}
+                </a>
             </div>
 
         </nav>

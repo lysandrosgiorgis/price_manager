@@ -47,6 +47,13 @@ Route::controller(CompanyController::class)->group(function(){
     Route::get('/competition/company/delete/{id}', 'delete')->name('competition.company.delete');
 });
 
+Route::controller(App\Http\Controllers\Competition\ProductController::class)->group(function(){
+    Route::get('/competition/product', 'companyProductList')->name('competition.product');
+    Route::get('/competition/product/update/{id}', 'edit')->name('competition.product.update');
+    Route::post('/competition/product/update/{id}', 'update')->name('competition.product.update');
+    Route::get('/competition/product/delete/{id}', 'delete')->name('competition.product.delete');
+});
+
 Route::controller(DebugController::class)->group(function(){
     Route::get('/dnd/debug/scrape', 'scrape')->name('scrape');
     Route::get('/dnd/debug/scrape-search', 'scrapeSearch')->name('scrape.search');
