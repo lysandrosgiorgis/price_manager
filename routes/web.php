@@ -1,0 +1,52 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Catalog\ProductController;
+use App\Http\Controllers\Catalog\ProductCategoryController;
+use App\Http\Controllers\Competition\CompanyController;
+use App\Http\Controllers\Dnd\DebugController;
+
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register web routes for your application. These
+| routes are loaded by the RouteServiceProvider and all of them will
+| be assigned to the "web" middleware group. Make something great!
+|
+*/
+
+Route::get('/', function () {
+    return view('welcome');
+});
+
+Auth::routes();
+
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+Route::controller(ProductController::class)->group(function(){
+    Route::get('/catalog/product', 'productList')->name('catalog.product');
+    Route::get('/catalog/product/create', 'create')->name('catalog.product.create');
+    Route::post('/catalog/product/create', 'store')->name('catalog.product.create');
+    Route::get('/catalog/product/update/{id}', 'edit')->name('catalog.product.update');
+    Route::post('/catalog/product/update/{id}', 'update')->name('catalog.product.update');
+    Route::get('/catalog/product/delete/{id}', 'delete')->name('catalog.product.delete');
+});
+
+Route::controller(ProductCategoryController::class)->group(function(){
+    Route::get('/catalog/category', 'productCategoryList')->name('catalog.category');
+});
+
+Route::controller(CompanyController::class)->group(function(){
+    Route::get('/competition/company', 'companyList')->name('competition.company');
+    Route::get('/competition/company/create', 'create')->name('competition.company.create');
+    Route::post('/competition/company/create', 'store')->name('competition.company.create');
+    Route::get('/competition/company/update/{id}', 'edit')->name('competition.company.update');
+    Route::post('/competition/company/update/{id}', 'update')->name('competition.company.update');
+    Route::get('/competition/company/delete/{id}', 'delete')->name('competition.company.delete');
+});
+
+Route::controller(DebugController::class)->group(function(){
+    Route::get('/dnd/debug/scrape', 'scrape')->name('scrape');
+});
