@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('products', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('sku');
-            $table->string('mpn');
-            $table->string('barcode');
+            $table->string('sku')->nullable();
+            $table->string('mpn')->nullable();
+            $table->string('barcode')->nullable();
             $table->text('description')->nullable();
             $table->enum('status', ['active', 'inactive'])->default('active');
             $table->enum('sync', ['active', 'inactive'])->default('active');

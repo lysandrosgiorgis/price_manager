@@ -49,4 +49,5 @@ Route::controller(CompanyController::class)->group(function(){
 
 Route::controller(DebugController::class)->group(function(){
     Route::get('/dnd/debug/scrape', 'scrape')->name('scrape');
+    Route::get('/dnd/debug/scrape-search', 'scrapeSearch')->name('scrape.search');
 });
