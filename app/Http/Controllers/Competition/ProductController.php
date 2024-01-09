@@ -11,39 +11,49 @@ class ProductController extends Controller
 {
     public function companyProductList(Request $request){
         $data['page_title'] = __('Products');
-        $data['products']   = $this->getList();
-//        echo '<pre>';
-//        print_r($data['products']);
-//        echo '</pre>';
+        $data['list']   = $this->getList($request);
         return view('pages.companyProductList', $data);
     }
 
-    public function getList($data = []){
-        $data['products'] = [];
-        foreach ($products = Product::all() as $product){
+    public function getList($request, $data = []){
+        $products = Product::paginate($request->input('limit', 15));
+        $data['list']['pagination'] = $products;
+        $data['list']['listActions'] = [
+            'width' => '156',
+        ];
+        $data['list']['list_items'] = [];
+        foreach ($products as $product){
             $company_products = $product->companyProducts;
             $company_products_array = [];
             foreach ($company_products as $companyProductIndex => $companyProductItem){
+                $urls = [];
+                foreach($companyProductItem->urls as $url){
+                    if($url->status == 'wrong') continue;
+                    $urls[] = $url;
+                }
                 $company_products_array[] = [
-                    'company_name' => $companyProductItem->company->name,
-                    'url'          => $companyProductItem->url,
-                    'update'           => route('competition.product.update', $companyProductItem->id),
-                    'delete'           => route('competition.product.delete', $companyProductItem->id),
+                    'id'            => $companyProductItem->id,
+                    'company_name'  => $companyProductItem->company->name,
+                    'url'           => $companyProductItem->url,
+                    'urls'          => $urls,
+                    'update'        => route('competition.product.update', $companyProductItem->id),
+                    'delete'        => route('competition.product.delete', $companyProductItem->id),
                 ];
             }
             $product_item = [
+                'id'               => $product->id,
                 'name'             => $product->name,
                 'sku'              => $product->sku,
                 'mpn'              => $product->mpn,
                 'barcode'          => $product->barcode,
-                'starting_price'   => $product->starting_price,
-                'final_price'      => $product->final_price,
+                'starting_price'   => round($product->starting_price, 2),
+                'final_price'      => round($product->final_price, 2),
                 'company_products' => $company_products_array,
             ];
-            $data['products'][] = $product_item;
+            $data['list']['list_items'][] = $product_item;
         }
 
-        return $data['products'];
+        return $data['list'];
     }
 
     public function edit($id){

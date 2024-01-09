@@ -17,7 +17,9 @@
           integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA=="
           crossorigin="anonymous"
           referrerpolicy="no-referrer" />
-
+    <script>
+        const APP_URL = '{{ config('app.url') }}';
+    </script>
     <!-- Scripts -->
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
 </head>
@@ -97,10 +99,10 @@
             </div>
 
         </nav>
-
         <main class="p-4">
             @yield('content')
         </main>
     </div>
+    @stack('beforeBody')
 </body>
 </html>

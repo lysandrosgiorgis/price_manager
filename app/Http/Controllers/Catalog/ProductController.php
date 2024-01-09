@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Catalog;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Catalog\Product;
+use App\Models\Competition\Company;
+use App\Models\Competition\Product as CompetitionProduct;
+use App\Helpers\ExcelHelper;
 
 class ProductController extends Controller
 {
@@ -23,7 +26,8 @@ class ProductController extends Controller
 
     public function productList(Request $request){
         $data['page_title'] = __('Products');
-        $data['list'] = $this->getList();
+
+        $data['list'] = $this->getList($request);
         return view('pages.list', $data);
     }
 
@@ -46,6 +50,8 @@ class ProductController extends Controller
         $product->barcode 	    = $request->barcode;
         $product->sku 	        = $request->sku;
         $product->image 	    = $request->image;
+        $product->starting_price 	    = $request->starting_price;
+        $product->final_price 	    = $request->final_price;
         $product->status 	    = $request->status;
         $product->sync 	        = $request->sync;
         $product->save();
@@ -83,6 +89,8 @@ class ProductController extends Controller
         $product->barcode 	    = $request->barcode;
         $product->sku 	        = $request->sku;
         $product->status 	    = $request->status;
+        $product->starting_price 	    = $request->starting_price;
+        $product->final_price 	    = $request->final_price;
         $product->sync 	        = $request->sync;
         $product->save();
 
@@ -144,6 +152,8 @@ class ProductController extends Controller
             'mpn'         => '',
             'sku'         => '',
             'barcode'         => '',
+            'final_price'         => '',
+            'starting_price'         => '',
             'status'        => 'active',
             'sync'          => 'active',
             'created_at'    => '',
@@ -172,6 +182,20 @@ class ProductController extends Controller
                                 'type' 		=> 'textarea',
                                 'wide' 		=> 1,
                                 'value' 	=> old('description', $product ? $product->description : $defaults['description'] ),
+                                'error'     => '',
+                            ],
+                            [
+                                'name' 		=> 'starting_price',
+                                'label' 	=> __('Price'),
+                                'type' 		=> 'text',
+                                'value' 	=> old('starting_price', $product ? $product->starting_price : $defaults['starting_price'] ),
+                                'error'     => '',
+                            ],
+                            [
+                                'name' 		=> 'final_price',
+                                'label' 	=> __('Final price'),
+                                'type' 		=> 'text',
+                                'value' 	=> old('final_price', $product ? $product->final_price : $defaults['final_price'] ),
                                 'error'     => '',
                             ],
                             [
@@ -256,7 +280,7 @@ class ProductController extends Controller
         return $data;
     }
 
-    public function getList($data = []){
+    public function getList(Request $request, $data = []){
         $url = [];
         foreach($this->filters as $filter){
             if (isset($this->request->get[$filter])) {
@@ -265,6 +289,16 @@ class ProductController extends Controller
         }
 
         $data['list']['title'] = __('Products');
+
+        $data['list']['buttons']['top'][] = [
+            'class' => 'btn btn-info text-white',
+            'action' => 'showImportProducts()',
+            'type'  => 'button',
+            'label' => __('Import products'),
+            'icon' => 'fa fa-file-excel',
+        ];
+        $data['list']['beforeBody'][] = 'templates.components.productsImportModal';
+        $data['list']['importProducts']['companies'] = Company::where('status','=',1)->get();
         $data['list']['buttons']['top'][] = [
             'class' => 'btn btn-success ',
             'type'  => 'link',
@@ -277,12 +311,28 @@ class ProductController extends Controller
                 'label' => __('Name'),
                 'class' => 'align-middle',
             ],
+            'starting_price'      => [
+                'label' => __('Price'),
+                'class' => 'align-middle',
+            ],
+            'final_price'      => [
+                'label' => __('Final price'),
+                'class' => 'align-middle',
+            ],
             'mpn'      => [
                 'label' => __('MPN'),
                 'class' => 'align-middle',
             ],
             'sku'      => [
                 'label' => __('SKU'),
+                'class' => 'align-middle',
+            ],
+            'model'      => [
+                'label' => __('Model'),
+                'class' => 'align-middle',
+            ],
+            'model_02'      => [
+                'label' => __('Model 2'),
                 'class' => 'align-middle',
             ],
             'barcode'      => [
@@ -304,11 +354,17 @@ class ProductController extends Controller
             'width' => '104',
         ];
         $data['list']['list_items'] = [];
-        foreach ($products = Product::all() as $product){
+        $products = Product::paginate($request->input('limit', 15));
+        $data['list']['pagination'] = $products;
+        foreach ($products as $product){
             $list_item = [
                 'name'      => $product->name,
                 'sku'      => $product->sku,
                 'mpn'      => $product->mpn,
+                'model'      => $product->model,
+                'model_02'      => $product->model_02,
+                'starting_price'      => $product->starting_price,
+                'final_price'      => $product->final_price,
                 'barcode'      => $product->barcode,
                 'status'    => view('templates.column.icon', [
                     'icon' => ($product->status == 'active') ? 'fa fa-check text-success' : 'fa fa-times text-danger',
@@ -351,5 +407,34 @@ class ProductController extends Controller
         $product = Product::findOrFail($id);
         $product->delete();
         return redirect( route('catalog.product') )->with('success','Product updated successfully');
+    }
+
+    public function importProducts(Request $request){
+        $productsIndex = [];
+        foreach(Product::all() as $product){
+            $productsIndex[$product->sku] = $product->id;
+        }
+        $companies = $request->company;
+        $excelHelper = new ExcelHelper;
+        $response = $excelHelper->excelFileToArray($request->file('import'), 2, 0);
+        $products = [];
+        foreach($response[0] as $row){
+            if(isset($productsIndex[$row[0]])) continue;
+            $newProduct = new Product();
+            $newProduct->name = $row[1];
+            $newProduct->sku = $row[0];
+            $newProduct->model = $row[2];
+            $newProduct->model_2 = $row[3];
+            $newProduct->mpn = $row[16];
+            $newProduct->save();
+
+            foreach($request->company as $company_id){
+                $competitionProduct = new CompetitionProduct();
+                $competitionProduct->product_id = $newProduct->id;
+                $competitionProduct->company_id = $company_id;
+                $competitionProduct->save();
+            }
+            $products[] = $row[0];
+        }
     }
 }

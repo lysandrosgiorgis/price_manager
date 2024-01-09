@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Catalog\ProductController;
 use App\Http\Controllers\Catalog\ProductCategoryController;
 use App\Http\Controllers\Competition\CompanyController;
+use App\Http\Controllers\Competition\ProductUrlController;
 use App\Http\Controllers\Dnd\DebugController;
 
 /*
@@ -32,6 +33,7 @@ Route::controller(ProductController::class)->group(function(){
     Route::get('/catalog/product/update/{id}', 'edit')->name('catalog.product.update');
     Route::post('/catalog/product/update/{id}', 'update')->name('catalog.product.update');
     Route::get('/catalog/product/delete/{id}', 'delete')->name('catalog.product.delete');
+    Route::post('/catalog/product/import', 'importProducts')->name('catalog.product.import');
 });
 
 Route::controller(ProductCategoryController::class)->group(function(){
@@ -52,6 +54,13 @@ Route::controller(App\Http\Controllers\Competition\ProductController::class)->gr
     Route::get('/competition/product/update/{id}', 'edit')->name('competition.product.update');
     Route::post('/competition/product/update/{id}', 'update')->name('competition.product.update');
     Route::get('/competition/product/delete/{id}', 'delete')->name('competition.product.delete');
+    Route::get('/competition/product/delete/{id}', 'delete')->name('competition.product.delete');
+});
+
+Route::controller(ProductUrlController::class)->group(function(){
+    Route::get('/competition/product-url/update-status/{id}', 'updateStatus')->name('competition.producturl.updatestatus');
+    Route::get('/competition/product-url/mass-update-status/{id}', 'massUpdateStatus')->name('competition.producturl.massUpdateStatus');
+    Route::get('/competition/product-url/accept/{id}', 'accept')->name('competition.producturl.accept');
 });
 
 Route::controller(DebugController::class)->group(function(){

@@ -1,11 +1,16 @@
 import 'bootstrap';
-import { Tooltip } from 'bootstrap';
+import { Modal, Tooltip } from 'bootstrap';
+window.Modal = Modal;
+window.Tooltip = Tooltip;
 
-// Create an example popover
 document.querySelectorAll('[data-bs-toggle="tooltip"]')
-    .forEach(tooltip => {
-        new Tooltip(tooltip)
-    })
+.forEach(tooltip => {
+    new Tooltip(tooltip)
+});
+document.querySelectorAll('[data-dnd-toggle="tooltip"]')
+.forEach(tooltip => {
+    new Tooltip(tooltip)
+});
 
 /**
  * We'll load the axios HTTP library which allows us to easily issue requests

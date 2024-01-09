@@ -16,6 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('product_id');
             $table->unsignedBigInteger('company_id');
             $table->string('url');
+            $table->timestamps();
             $table->enum('status', ['active', 'inactive'])->default('active');
             $table->enum('sync', ['active', 'inactive'])->default('active');
             $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');

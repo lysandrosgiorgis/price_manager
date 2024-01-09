@@ -20,7 +20,7 @@ class CompanyController extends Controller
 
     public function companyList(Request $request){
         $data['page_title'] = __('Companies');
-        $data['list'] = $this->getList();
+        $data['list'] = $this->getList($request);
         return view('pages.list', $data);
     }
 
@@ -214,7 +214,7 @@ class CompanyController extends Controller
         return $data;
     }
 
-    public function getList($data = []){
+    public function getList($request, $data = []){
         $url = [];
         foreach($this->filters as $filter){
             if (isset($this->request->get[$filter])) {
@@ -250,7 +250,10 @@ class CompanyController extends Controller
             'width' => '104',
         ];
         $data['list']['list_items'] = [];
-        foreach ($companies = Company::all() as $company){
+
+        $companies = Company::paginate($request->input('limit', 15));
+        $data['list']['pagination'] = $companies;
+        foreach ($companies as $company){
             $list_item = [
                 'name'      => $company->name,
                 'status'    => view('templates.column.icon', [

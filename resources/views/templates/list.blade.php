@@ -8,7 +8,7 @@
                 </a>
             @endif
             @if($button['type'] == 'button')
-                <button type="button"  onclick="{{ $button['action'] }}" class="{{ $button['class'] }} btn mb-2 mb-md-0 ms-1"  data-bs-toggle="tooltip" title="{{ $button['label'] }}">
+                <button type="button"  onclick="{{ $button['action'] }}" class="{{ $button['class'] }} btn mb-1 ms-1"  data-bs-toggle="tooltip" title="{{ $button['label'] }}">
                     @if($button['icon'])<span class="{{ $button['icon'] }}" aria-hidden="true"></span>@endif
                     <span class="@if(isset($button['hideLabel'])) visually-hidden @else d-none d-xl-inline @endif ">{{ $button['label'] }}</span>
                 </button>
@@ -38,7 +38,7 @@
                     </td>
                 @endforeach
                 @isset($listItem['actions'])
-                    <td class="columnActions">
+                    <td class="columnActions text-end" >
                         @foreach($listItem['actions'] as $actionIndex => $action)
                             @if($action['type'] == 'link')
                                 <a href="{{ $action['href'] }}"
@@ -73,3 +73,4 @@
         @endforeach
     </tbody>
 </table>
+{{ $pagination->links() }}
