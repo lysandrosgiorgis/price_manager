@@ -1,0 +1,66 @@
+.data-card {
+    background: #ffffff;
+    padding: 1rem;
+    .data-card-numbers {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        .fa {
+            font-size:2rem;
+            color: blue;
+        }
+        .plus-percentage-number {
+            color: #4caf50;
+            background-color: #e8f5e9;
+            border-radius: 20px;
+            padding: 5px 10px;
+            font-weight: bold;
+        }
+        .minus-percentage-number {
+            color: #f44336 ;
+            background-color: #ffebee;
+            border-radius: 20px;
+            padding: 5px 10px;
+            font-weight: bold;
+        }
+    }
+    a {
+        color:$body-color;
+        transition: $transition-base;
+        text-decoration: none;
+        &:hover,
+        &:focus{
+            color:$primary;
+        }
+    }
+}
+
+.home-table {
+    background: #ffffff;
+    padding: 1rem;
+    .table > :not(caption) > * > * {
+        background-color: #ffffff;
+    }
+    th {
+        border-color: #000000;
+        font-size: 0.9rem;
+    }
+    td {
+        font-size: 0.8rem;
+        &.plus-price {
+            color:#4caf50;
+        }
+        &.minus-price {
+            color:#f44336;
+        }
+    }
+    a {
+        color:$body-color;
+        transition: $transition-base;
+        text-decoration: none;
+        &:hover,
+        &:focus{
+            color:$primary;
+        }
+    }
+}

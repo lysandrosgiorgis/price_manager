@@ -1,0 +1,19 @@
+.list-table {
+    .table > :not(caption) > * > * {
+        background-color: #ffffff;
+    }
+    th {
+        border-color: #000000;
+        font-size: 0.8rem;
+    }
+    td {
+        font-size: 0.8rem;
+    }
+    .column-chart {
+        width:300px;
+    }
+    .chart-container {
+        max-height:200px;
+    }
+}
+

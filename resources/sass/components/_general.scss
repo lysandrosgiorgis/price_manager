@@ -1,0 +1,9 @@
+#main-page{
+    margin-left:$leftNavigationWidth;
+    .activeMenu & {
+        margin-left: 4rem;
+    }
+}
+main {
+    margin-left: 0rem;
+}

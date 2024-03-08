@@ -1,3 +1,35 @@
 #top{
     height: $headerTopHeight;
 }
+.header-icon {
+    text-decoration: none;
+    color: #212529;
+    position: relative;
+    &:hover,
+    &:focus{
+        color:$primary;
+    }
+    &::after{
+        display: none;
+    }
+    .label {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        text-align: center;
+        font-size: 9px;
+        padding: 2px 3px;
+        line-height: .9;
+        color:#fff;
+        font-weight:bold;
+    }
+    .label-success {
+        background-color: #00a65a;
+    }
+    .label-warning{
+        background-color: #f39c12;
+    }
+    .label-danger{
+        background-color: #dd4b39 ;
+    }
+}

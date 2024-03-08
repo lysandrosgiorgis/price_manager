@@ -32,6 +32,7 @@ Route::controller(ProductController::class)->group(function(){
     Route::post('/catalog/product/create', 'store')->name('catalog.product.create');
     Route::get('/catalog/product/update/{id}', 'edit')->name('catalog.product.update');
     Route::post('/catalog/product/update/{id}', 'update')->name('catalog.product.update');
+    Route::get('/catalog/product/info/{id}', 'info')->name('catalog.product.info');
     Route::get('/catalog/product/delete/{id}', 'delete')->name('catalog.product.delete');
     Route::post('/catalog/product/import', 'importProducts')->name('catalog.product.import');
 });

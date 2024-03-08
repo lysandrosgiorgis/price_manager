@@ -1,20 +1,62 @@
 #sidebarLeft{
     position: fixed;
     left:0;
-    top:$headerTopHeight;
+    top:0;
     bottom: 0;
     width:$leftNavigationWidth;
     transform: translateX(-100%);
     z-index: $zindex-fixed;
     transition: $transition-base;
     .activeMenu & {
-        transform: translateX(0%);
+        transform: translateX(0);
+        width: 4rem;
+        .menu-link-text,
+        .small-right,
+        .child-container{
+            display:none;
+        }
+        &:hover{
+            width:$leftNavigationWidth;
+            .menu-link-text,
+            .small-right,
+            .child-container{
+                display:inline-block;
+            }
+        }
     }
     @media screen and (min-width: 992px ) {
         transform: translateX(0);
         .activeMenu & {
-            transform: translateX(-100%);
+            width: 4rem;
+            transform: translateX(0);
+            .menu-link-text,
+            .small-right ,
+            .child-container{
+                display:none;
+            }
+            &:hover{
+                width:$leftNavigationWidth;
+                .menu-link-text,
+                .small-right ,
+                .child-container{
+                    display:inline-block;
+                }
+            }
         }
+    }
+}
+.home-link {
+    height: 3.75rem;
+    padding: 1rem 1rem;
+    display: block;
+    font-size: 1.2rem;
+    text-decoration: none;
+    color: #212529;
+    transition: all 0.2s ease-in-out;
+    text-align: left;
+    &:hover,
+    &:focus{
+        color:$primary;
     }
 }
 body.activeMenu{
@@ -56,11 +98,11 @@ main{
 
 .menu-link{
     width: 100%;
+    position: relative;
     cursor: pointer;
     display: block;
-    border-bottom: 1px solid $border-color;
     font-size: 1.2rem;
-    padding-block: .25rem .125rem;
+    padding: 0.5rem 1rem;
     text-decoration: none;
     color:$body-color;
     transition: $transition-base;
@@ -70,5 +112,12 @@ main{
     }
     &.child-link {
         font-size: 1rem;
+    }
+    .small-right {
+        font-size: 1rem;
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
     }
 }

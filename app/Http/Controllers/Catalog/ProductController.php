@@ -73,6 +73,20 @@ class ProductController extends Controller
         return view('pages.form', $data);
     }
 
+    public function info($id){
+        $product = Product::findOrFail($id);
+
+        $data = [
+            'name'   =>  $product->name,
+            'image'  =>  $product->image,
+            'chart' => view('templates.column.chart', [
+                'id' => $product->id
+            ])
+        ];
+
+        return view('pages.product', $data);
+    }
+
     public function update($id, Request $request){
         $product = Product::findOrFail($id);
 
@@ -307,8 +321,65 @@ class ProductController extends Controller
             'icon' => 'fa fa-plus',
         ];
         $data['list']['columns'] = [
+            'img'      => [
+                'label' => __(''),
+                'class' => 'align-middle',
+                'width' => 220,
+            ],
             'name'      => [
-                'label' => __('Name'),
+                'label' => __('Όνομα'),
+                'class' => 'align-middle',
+            ],
+            'chart'      => [
+                'label' => __('Chart'),
+                'class' => 'align-middle',
+            ],
+            'barcode'      => [
+                'label' => __('Barcode'),
+                'class' => 'align-middle',
+            ],
+            'position'      => [
+                'label' => __('Θέση'),
+                'class' => 'align-middle',
+            ],
+            'updated_at'      => [
+                'label' => __('Τελευταία Αλλαγή'),
+                'class' => 'align-middle',
+            ],
+            'cheapest'      => [
+                'label' => __('Φθηνότερος'),
+                'class' => 'align-middle',
+            ],
+            'cheapest_days'      => [
+                'label' => __('Μέρες'),
+                'class' => 'align-middle',
+            ],
+            'priciest'      => [
+                'label' => __('Ακριβότερος'),
+                'class' => 'align-middle',
+            ],
+            'competitors_no'      => [
+                'label' => __('No. Ανταγωνιστών'),
+                'class' => 'align-middle',
+            ],
+            'lowest_possible_price'      => [
+                'label' => __('ΧΔΤ'),
+                'class' => 'align-middle',
+            ],
+            'highest_possible_price'      => [
+                'label' => __('ΥΔΤ'),
+                'class' => 'align-middle',
+            ],
+            'entersoft_update'      => [
+                'label' => __('Entersoft Update'),
+                'class' => 'align-middle',
+            ],
+            'entersoft_offer'      => [
+                'label' => __('Προτ. τιμή'),
+                'class' => 'align-middle',
+            ],
+            'value'      => [
+                'label' => __('Κόστος'),
                 'class' => 'align-middle',
             ],
             'starting_price'      => [
@@ -319,36 +390,44 @@ class ProductController extends Controller
                 'label' => __('Final price'),
                 'class' => 'align-middle',
             ],
-            'mpn'      => [
-                'label' => __('MPN'),
+            'vendor_cover'      => [
+                'label' => __('Ποσό κάλυψης'),
                 'class' => 'align-middle',
             ],
-            'sku'      => [
-                'label' => __('SKU'),
+            'profit_percentage'      => [
+                'label' => __('% κερδοφορίας'),
                 'class' => 'align-middle',
             ],
-            'model'      => [
-                'label' => __('Model'),
-                'class' => 'align-middle',
-            ],
-            'model_02'      => [
-                'label' => __('Model 2'),
-                'class' => 'align-middle',
-            ],
-            'barcode'      => [
-                'label' => __('Barcode'),
-                'class' => 'align-middle',
-            ],
-            'status'    => [
-                'label' => __('Status'),
-                'class' => 'text-center align-middle',
-                'width' => '10'
-            ],
-            'sync'      => [
-                'label' => __('Sync'),
-                'class' => 'text-center align-middle',
-                'width' => '10'
-            ],
+//            'mpn'      => [
+//                'label' => __('MPN'),
+//                'class' => 'align-middle',
+//            ],
+//            'sku'      => [
+//                'label' => __('SKU'),
+//                'class' => 'align-middle',
+//            ],
+//            'model'      => [
+//                'label' => __('Model'),
+//                'class' => 'align-middle',
+//            ],
+//            'model_02'      => [
+//                'label' => __('Model 2'),
+//                'class' => 'align-middle',
+//            ],
+//            'barcode'      => [
+//                'label' => __('Barcode'),
+//                'class' => 'align-middle',
+//            ],
+//            'status'    => [
+//                'label' => __('Status'),
+//                'class' => 'text-center align-middle',
+//                'width' => '10'
+//            ],
+//            'sync'      => [
+//                'label' => __('Sync'),
+//                'class' => 'text-center align-middle',
+//                'width' => '10'
+//            ],
         ];
         $data['list']['listActions'] = [
             'width' => '104',
@@ -356,46 +435,78 @@ class ProductController extends Controller
         $data['list']['list_items'] = [];
         $products = Product::paginate($request->input('limit', 15));
         $data['list']['pagination'] = $products;
+        $min = strtotime('01-02-2024');
+        $max = strtotime('08-03-2024');
         foreach ($products as $product){
+            $val = rand($min, $max);
+            $date = date('d-m-Y', $val);
             $list_item = [
-                'name'      => $product->name,
-                'sku'      => $product->sku,
-                'mpn'      => $product->mpn,
-                'model'      => $product->model,
-                'model_02'      => $product->model_02,
-                'starting_price'      => $product->starting_price,
-                'final_price'      => $product->final_price,
-                'barcode'      => $product->barcode,
-                'status'    => view('templates.column.icon', [
+                'img'                    => view('templates.column.img', [
+                    'img' => $product->image ,
+                ]),
+                'name'                   => $product->name,
+                'chart'                  => view('templates.column.chart', [
+                    'id' => $product->id
+                ]),
+                'position'               => rand(1, 5),
+                'updated_at'             => $date,
+                'cheapest'               => 'competitor',
+                'cheapest_days'          => rand(1, 5),
+                'priciest'               => 'competitor',
+                'competitors_no'         => rand(1, 5),
+                'lowest_possible_price'  => rand(10, 1000).'.00€',
+                'highest_possible_price' => rand(10, 1000).'.00€',
+                'entersoft_update'       => '',
+                'entersoft_offer'        => rand(10, 1000).'.00€',
+                'value'                  => rand(10, 1000).'.00€',
+                'vendor_cover'           => rand(10, 1000).'.00€',
+                'profit_percentage'      => rand(0, 100).'%',
+                'sku'                    => $product->sku,
+                'mpn'                    => $product->mpn,
+                'model'                  => $product->model,
+                'model_02'               => $product->model_02,
+                'starting_price'         => round($product->starting_price,2).'€',
+                'final_price'            => round($product->final_price,2).'€',
+                'barcode'                => $product->barcode,
+                'status'                 => view('templates.column.icon', [
                     'icon' => ($product->status == 'active') ? 'fa fa-check text-success' : 'fa fa-times text-danger',
                     'label' => ($product->status == 'active') ? __('Active') : __('Inactive'),
                     'tooltip' => 1,
                     'hideLabel' => 1,
                 ]),
-                'sync'    => view('templates.column.icon', [
+                'sync'                   => view('templates.column.icon', [
                     'icon' => ($product->sync == 'active') ? 'fa fa-check text-success' : 'fa fa-times text-danger',
                     'label' => ($product->sync == 'active') ? __('Active') : __('Inactive'),
                     'tooltip' => 1,
                     'hideLabel' => 1,
                 ]),
             ];
-            $list_item['actions']['update'] = [
-                'class' => 'btn btn-info text-white',
-                'type'  => 'link',
-                'href'  => route('catalog.product.update', $product->id),
-                'label' => __('Update product'),
+            $list_item['actions']['info'] = [
+                'class'     => 'btn btn-success text-white btn-sm',
+                'type'      => 'link',
+                'href'      => route('catalog.product.info', $product->id),
+                'label'     => __('Product info'),
                 'hideLabel' => 1,
-                'tooltip' => 1,
-                'icon' => 'fa fa-pencil',
+                'tooltip'   => 1,
+                'icon'      => 'fa fa-eye',
+            ];
+            $list_item['actions']['update'] = [
+                'class'     => 'btn btn-info text-white btn-sm',
+                'type'      => 'link',
+                'href'      => route('catalog.product.update', $product->id),
+                'label'     => __('Update product'),
+                'hideLabel' => 1,
+                'tooltip'   => 1,
+                'icon'      => 'fa fa-pencil',
             ];
             $list_item['actions']['delete'] = [
-                'class' => 'btn btn-danger',
-                'type'  => 'button',
-                'action'  => "if(confirm('".__('Are you sure you want to delete?')."')){ window.location = '".route('catalog.product.delete', $product->id)."';}",
-                'label' => __('Delete product'),
+                'class'     => 'btn btn-danger btn-sm',
+                'type'      => 'button',
+                'action'    => "if(confirm('".__('Are you sure you want to delete?')."')){ window.location = '".route('catalog.product.delete', $product->id)."';}",
+                'label'     => __('Delete product'),
                 'hideLabel' => 1,
-                'tooltip' => 1,
-                'icon' => 'fa fa-trash',
+                'tooltip'   => 1,
+                'icon'      => 'fa fa-trash',
             ];
             $data['list']['list_items'][] = $list_item;
         }

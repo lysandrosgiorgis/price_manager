@@ -16,7 +16,8 @@
         @endforeach
     </div>
 @endisset
-<table class="table table-bordered table-striped table-hover">
+<div class="table-responsive list-table position-relative">
+<table class="table table-hover">
     <thead>
         <tr>
             @foreach($columns as $columnIndex => $column)
@@ -33,7 +34,7 @@
         @foreach($list_items as $itemIndex => $listItem)
             <tr class="{{ isset($listItem['class']) ? $listItem['class'] : '' }}">
                 @foreach($columns as $columnIndex => $column)
-                    <td class="{{ isset($column['class']) ? $column['class'] : '' }} column-{{ $columnIndex }} ">
+                    <td class="{{ isset($column['class']) ? $column['class'] : '' }} column-{{ $columnIndex }}" @isset($column['width']) width="{{ $column['width'] }}" @endisset>
                         {{ $listItem[$columnIndex]  }}
                     </td>
                 @endforeach
@@ -73,4 +74,5 @@
         @endforeach
     </tbody>
 </table>
+</div>
 {{ $pagination->links() }}
