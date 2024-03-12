@@ -77,9 +77,17 @@ class ProductController extends Controller
         $product = Product::findOrFail($id);
 
         $data = [
-            'name'   =>  $product->name,
-            'image'  =>  $product->image,
-            'chart' => view('templates.column.chart', [
+            'id'             =>  $product->id,
+            'name'           =>  $product->name,
+            'image'          =>  $product->image,
+            'starting_price' =>  $product->starting_price,
+            'final_price'    =>  $product->final_price,
+            'final_from'     =>  $product->final_from,
+            'final_to'       =>  $product->final_to,
+            'lowest_price'   =>  $product->lowest_price,
+            'highest_price'  =>  $product->highest_price,
+            'image'          =>  $product->image,
+            'chart'          => view('templates.column.chart', [
                 'id' => $product->id
             ])
         ];
@@ -301,6 +309,8 @@ class ProductController extends Controller
                 $url[] = $filter.'='.$this->request->get[$filter];
             }
         }
+        $data['product_filters'] = $request->all();
+
 
         $data['list']['title'] = __('Products');
 
@@ -322,7 +332,7 @@ class ProductController extends Controller
         ];
         $data['list']['columns'] = [
             'img'      => [
-                'label' => __(''),
+                'label' => __('Εικόνα'),
                 'class' => 'align-middle',
                 'width' => 220,
             ],
@@ -433,7 +443,9 @@ class ProductController extends Controller
             'width' => '104',
         ];
         $data['list']['list_items'] = [];
-        $products = Product::paginate($request->input('limit', 15));
+//        $products = Product::paginate($request->input('limit', 15));
+        $products = Product::filter($data['product_filters'])
+            ->paginate($request->input('limit', 15));
         $data['list']['pagination'] = $products;
         $min = strtotime('01-02-2024');
         $max = strtotime('08-03-2024');
@@ -448,11 +460,11 @@ class ProductController extends Controller
                 'chart'                  => view('templates.column.chart', [
                     'id' => $product->id
                 ]),
-                'position'               => rand(1, 5),
+                'position'               => $product->position,
                 'updated_at'             => $date,
-                'cheapest'               => 'competitor',
+                'cheapest'               => ($product->has_lowest_price) ? '<span class="fa fa-check text-success fs-3" aria-hidden="true" data-bs-toggle="tooltip" data-bs-title="Φθηνότερος"></span>' : 'competitor',
                 'cheapest_days'          => rand(1, 5),
-                'priciest'               => 'competitor',
+                'priciest'               => ($product->has_highest_price) ? '<span class="fa fa-check text-success fs-3" aria-hidden="true" data-bs-toggle="tooltip" data-bs-title="Φθηνότερος"></span>' : 'competitor',
                 'competitors_no'         => rand(1, 5),
                 'lowest_possible_price'  => rand(10, 1000).'.00€',
                 'highest_possible_price' => rand(10, 1000).'.00€',
@@ -510,6 +522,70 @@ class ProductController extends Controller
             ];
             $data['list']['list_items'][] = $list_item;
         }
+        $data['list']['visibleColumns'] = [
+            'img',
+            'name',
+            'chart',
+            'barcode',
+            'position',
+            'updated_at',
+            'cheapest',
+            'cheapest_days',
+            'priciest',
+            'competitors_no',
+            'lowest_possible_price',
+            'highest_possible_price',
+            'entersoft_update',
+            'entersoft_offer',
+            'value',
+            'starting_price',
+            'final_price',
+            'vendor_cover',
+            'profit_percentage',
+        ];
+        $data['list']['filters_form'] = 'catalog.product';
+        $data['list']['filters'] = [
+            [
+                'name'  => 'name',
+                'type'  => 'text',
+                'value' => $request->input('name', ''),
+                'label' => __('Όνομα'),
+            ],
+            [
+                'name'  => 'barcode',
+                'type'  => 'text',
+                'value' => $request->input('barcode', ''),
+                'label' => __('Barcode'),
+            ],
+            [
+                'name'  => 'has_lowest_price',
+                'type'  => 'select',
+                'value' => $request->input('has_lowest_price', ''),
+                'label' => __('Φθηνότερος'),
+                'options' => [
+                    'Επιλέξτε' => '',
+                    'Ναι'      => 1,
+                    'Οχι'      => 0,
+                ]
+            ],
+            [
+                'name'  => 'has_highest_price',
+                'type'  => 'select',
+                'value' => $request->input('has_highest_price', ''),
+                'label' => __('Ακριβότερος'),
+                'options' => [
+                    'Επιλέξτε' => '',
+                    'Ναι'      => 1,
+                    'Οχι'      => 0,
+                ]
+            ],
+            [
+                'name'  => 'position',
+                'type'  => 'text',
+                'value' => $request->input('position', ''),
+                'label' => __('Θέση'),
+            ],
+       ];
 
         return $data['list'];
     }
