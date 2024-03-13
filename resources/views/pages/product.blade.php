@@ -70,7 +70,7 @@
                     <tbody>
                         @foreach($competitors as $competitor)
                             <tr>
-                                <td>{{ $competitor['company_id']  }}</td>
+                                <td>{{ $competitor['name']  }}</td>
                                 <td class="column-chart">{!! $chart !!}</td>
                                 <td class="plus-price fw-bold">10.00€</td>
                                 <td>{{ $competitor['updated_at']  }}</td>

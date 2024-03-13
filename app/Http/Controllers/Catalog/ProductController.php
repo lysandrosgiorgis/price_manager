@@ -75,11 +75,12 @@ class ProductController extends Controller
 
     public function info($id){
         $product      = Product::findOrFail($id);
-        $competitotrs = CompetitionProduct::where('product_id','=',$id)->get();
+        $competitotrs = CompetitionProduct::leftJoin('companies', 'products_companies.company_id', '=', 'companies.id')->where('product_id','=',$id)->get();
 
         foreach($competitotrs as $competitor) {
             $product_competitors[$competitor->company_id] = [
                 'company_id'  => $competitor->company_id,
+                'name'        => $competitor->name,
                 'url'         => $competitor->url,
                 'description' => $competitor->description,
                 'updated_at'  => date('Y-m-d',strtotime($competitor->updated_at)),
