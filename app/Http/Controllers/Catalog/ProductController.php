@@ -456,7 +456,7 @@ class ProductController extends Controller
             $date = date('d-m-Y', $val);
             $list_item = [
                 'img'                    => view('templates.column.img', [
-                    'img' => $product->image ,
+                    'img' => ($product->image) ? $product->image : 'https://place-hold.it/200?fbclid=IwAR2x7A8JE71lW1uDy5G-Q2J23DKTPetr8p-4S-64Hwl3tDtPb5eWg19Y2n0',
                 ]),
                 'name'                   => $product->name,
                 'chart'                  => view('templates.column.chart', [
