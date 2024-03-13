@@ -74,8 +74,17 @@ class ProductController extends Controller
     }
 
     public function info($id){
-        $product = Product::findOrFail($id);
+        $product      = Product::findOrFail($id);
+        $competitotrs = CompetitionProduct::where('product_id','=',$id)->get();
 
+        foreach($competitotrs as $competitor) {
+            $product_competitors[$competitor->company_id] = [
+                'company_id'  => $competitor->company_id,
+                'url'         => $competitor->url,
+                'description' => $competitor->description,
+                'updated_at'  => date('Y-m-d',strtotime($competitor->updated_at)),
+            ];
+        }
         $data = [
             'id'             =>  $product->id,
             'name'           =>  $product->name,
@@ -88,7 +97,8 @@ class ProductController extends Controller
             'highest_price'  =>  $product->highest_price,
             'chart'          => view('templates.column.chart', [
                 'id' => $product->id
-            ])
+            ]),
+            'competitors'   => $product_competitors
         ];
 
         return view('pages.product', $data);

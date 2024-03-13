@@ -68,73 +68,41 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>Competitor</td>
-                            <td class="column-chart">{!! $chart !!}</td>
-                            <td class="plus-price fw-bold">10.00€</td>
-                            <td>08-03-2024</td>
-                            <td class="text-center"><a href="" target="_blank" class="btn btn-warning text-white"><span class="fa-solid fa-link"></span></a></td>
-                            <td class="text-center">
-                                <button type="button" class="btn btn-info text-white" data-bs-toggle="modal" data-bs-target="#desc">
-                                    <span class="fa-solid fa-circle-info"></span>
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Competitor</td>
-                            <td class="column-chart">{!! $chart !!}</td>
-                            <td class="minus-price fw-bold">10.00€</td>
-                            <td>08-03-2024</td>
-                            <td class="text-center"><a href="" target="_blank" class="btn btn-warning text-white"><span class="fa-solid fa-link"></span></a></td>
-                            <td class="text-center">
-                                <button type="button" class="btn btn-info text-white" data-bs-toggle="modal" data-bs-target="#desc">
-                                    <span class="fa-solid fa-circle-info"></span>
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Competitor</td>
-                            <td class="column-chart">{!! $chart !!}</td>
-                            <td class="minus-price fw-bold">10.00€</td>
-                            <td>08-03-2024</td>
-                            <td class="text-center"><a href="" target="_blank" class="btn btn-warning text-white"><span class="fa-solid fa-link"></span></a></td>
-                            <td class="text-center">
-                                <button type="button" class="btn btn-info text-white" data-bs-toggle="modal" data-bs-target="#desc">
-                                    <span class="fa-solid fa-circle-info"></span>
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Competitor</td>
-                            <td class="column-chart">{!! $chart !!}</td>
-                            <td class="plus-price fw-bold">10.00€</td>
-                            <td>08-03-2024</td>
-                            <td class="text-center"><a href="" target="_blank" class="btn btn-warning text-white"><span class="fa-solid fa-link"></span></a></td>
-                            <td class="text-center">
-                                <button type="button" class="btn btn-info text-white" data-bs-toggle="modal" data-bs-target="#desc">
-                                    <span class="fa-solid fa-circle-info"></span>
-                                </button>
-                            </td>
-                        </tr>
+                        @foreach($competitors as $competitor)
+                            <tr>
+                                <td>{{ $competitor['company_id']  }}</td>
+                                <td class="column-chart">{!! $chart !!}</td>
+                                <td class="plus-price fw-bold">10.00€</td>
+                                <td>{{ $competitor['updated_at']  }}</td>
+                                <td class="text-center"><a href="{{ $competitor['url']  }}" target="_blank" class="btn btn-warning text-white"><span class="fa-solid fa-link"></span></a></td>
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-info text-white" data-bs-toggle="modal" data-bs-target="#desc-{{ $competitor['company_id']  }}">
+                                        <span class="fa-solid fa-circle-info"></span>
+                                    </button>
+                                </td>
+                            </tr>
+                        @endforeach
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
     <!-- Modal -->
-    <div class="modal fade bd-example-modal-xl" id="desc" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
-        <div class="modal-dialog modal-xl" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLongTitle">{{ __('Περιγραφή') }}</h5>
-                    <button type="button" class="close btn btn-danger" data-bs-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    {{ __('Περιγραφή κείμενο') }}
+    @foreach($competitors as $competitor)
+        <div class="modal fade bd-example-modal-xl" id="desc-{{ $competitor['company_id']  }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+            <div class="modal-dialog modal-xl" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLongTitle">{{ __('Περιγραφή') }}</h5>
+                        <button type="button" class="close btn btn-danger" data-bs-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        {!! $competitor['description'] !!}
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    @endforeach
 @endsection
