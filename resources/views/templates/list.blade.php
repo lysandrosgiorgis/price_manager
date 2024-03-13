@@ -62,8 +62,14 @@
                 <tr class="{{ isset($listItem['class']) ? $listItem['class'] : '' }}">
                     @foreach($columns as $columnIndex => $column)
                         <td class="{{ isset($column['class']) ? $column['class'] : '' }} column-{{ $columnIndex }}" @isset($column['width']) width="{{ $column['width'] }}" @endisset>
-{{--                            {{ $listItem[$columnIndex]  }}--}}
-                            {!! $listItem[$columnIndex] !!}
+                            @isset($column['template'])
+                                @include(
+                                    $column['template'],
+                                    $listItem[$columnIndex]
+                                )
+                            @else
+                                {!! $listItem[$columnIndex] !!}
+                            @endisset
                         </td>
                     @endforeach
                     @isset($listItem['actions'])

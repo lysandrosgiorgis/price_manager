@@ -5,9 +5,20 @@
         display: flex;
         justify-content: space-between;
         align-items: baseline;
-        .fa {
-            font-size:2rem;
-            color: blue;
+        i{
+            font-size:1.5rem;
+            &.green{
+                color: #4caf50;
+            }
+            &.red{
+                color: #f44336;
+            }
+            &.yellow{
+                color: #f39c12;
+            }
+            &.blue{
+                color: #0d6efd;
+            }
         }
         .plus-percentage-number {
             color: #4caf50;
@@ -52,6 +63,9 @@
         }
         &.minus-price {
             color:#f44336;
+        }
+        &.neutral-price {
+            color:#0d6efd;
         }
     }
     a {

@@ -393,12 +393,14 @@ class ProductController extends Controller
                 'class' => 'align-middle',
             ],
             'starting_price'      => [
-                'label' => __('Price'),
-                'class' => 'align-middle',
+                'label'     => __('Price'),
+                'template' 	=> 'templates.input.price_quick_update',
+                'class'     => 'align-middle',
             ],
             'final_price'      => [
-                'label' => __('Final price'),
-                'class' => 'align-middle',
+                'label'    => __('Final price'),
+                'template' => 'templates.input.price_quick_update',
+                'class'    => 'align-middle',
             ],
             'vendor_cover'      => [
                 'label' => __('Ποσό κάλυψης'),
@@ -461,7 +463,7 @@ class ProductController extends Controller
                     'id' => $product->id
                 ]),
                 'position'               => $product->position,
-                'updated_at'             => $date,
+                'updated_at'             => date('Y-m-d', strtotime($product->updated_at)),
                 'cheapest'               => ($product->has_lowest_price) ? '<span class="fa fa-check text-success fs-3" aria-hidden="true" data-bs-toggle="tooltip" data-bs-title="Φθηνότερος"></span>' : 'competitor',
                 'cheapest_days'          => rand(1, 5),
                 'priciest'               => ($product->has_highest_price) ? '<span class="fa fa-check text-success fs-3" aria-hidden="true" data-bs-toggle="tooltip" data-bs-title="Φθηνότερος"></span>' : 'competitor',
@@ -477,8 +479,16 @@ class ProductController extends Controller
                 'mpn'                    => $product->mpn,
                 'model'                  => $product->model,
                 'model_02'               => $product->model_02,
-                'starting_price'         => round($product->starting_price,2).'€',
-                'final_price'            => round($product->final_price,2).'€',
+                'starting_price'         => [
+                    'product_id' 	  => $product->id,
+                    'price_formatted' => number_format($product->starting_price,'2',',','.').'€',
+                    'price'           => $product->starting_price
+                ],
+                'final_price'            => [
+                    'product_id' 	  => $product->id,
+                    'price_formatted' => number_format($product->final_price,'2',',','.').'€',
+                    'price'           => $product->final_price
+                ],
                 'barcode'                => $product->barcode,
                 'status'                 => view('templates.column.icon', [
                     'icon' => ($product->status == 'active') ? 'fa fa-check text-success' : 'fa fa-times text-danger',
@@ -573,6 +583,17 @@ class ProductController extends Controller
                 'type'  => 'select',
                 'value' => $request->input('has_highest_price', ''),
                 'label' => __('Ακριβότερος'),
+                'options' => [
+                    'Ναι'      => 1,
+                    'Οχι'      => 0,
+                    'Επιλέξτε' => '',
+                ]
+            ],
+            [
+                'name'  => 'has_competitor',
+                'type'  => 'select',
+                'value' => $request->input('has_competitor', ''),
+                'label' => __('Έχει Ανταγωνιστή'),
                 'options' => [
                     'Ναι'      => 1,
                     'Οχι'      => 0,

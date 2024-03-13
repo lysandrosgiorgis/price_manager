@@ -34,3 +34,9 @@ window.postAjax = function (url, data, callback) {
     request.send(params);
     return request;
 }
+document.addEventListener('DOMContentLoaded', function() {
+    $('.price-input span')
+        .dblclick(function () {
+            $(this).parent().addClass('edit');
+        });
+});
