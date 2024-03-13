@@ -79,14 +79,13 @@ class ProductController extends Controller
         $data = [
             'id'             =>  $product->id,
             'name'           =>  $product->name,
-            'image'          =>  $product->image,
+            'image'            => ($product->image) ? $product->image : 'https://place-hold.it/200?fbclid=IwAR2x7A8JE71lW1uDy5G-Q2J23DKTPetr8p-4S-64Hwl3tDtPb5eWg19Y2n0',
             'starting_price' =>  $product->starting_price,
             'final_price'    =>  $product->final_price,
             'final_from'     =>  $product->final_from,
             'final_to'       =>  $product->final_to,
             'lowest_price'   =>  $product->lowest_price,
             'highest_price'  =>  $product->highest_price,
-            'image'          =>  $product->image,
             'chart'          => view('templates.column.chart', [
                 'id' => $product->id
             ])

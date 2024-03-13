@@ -3,7 +3,7 @@
     <div class="card mb-3">
         <div class="card-body">
             <div class="product-info-header d-flex">
-                <div class="">
+                <div class="me-3">
                     <img src="{{ $image }}" class="img-fluid" width="200"/>
                 </div>
                 <div class="">
