@@ -186,6 +186,79 @@ class DebugController extends Controller
 
     }
 
+    public function scrapeTalos()
+    {
+        $targetUrl = 'https://www.brownells.it/epages/Italia.sf/it_IT/?ObjectID=107483';
+        $proxy = Proxy::where('status', '=', '1')->orderBy('lastUsed', 'asc')->first();
+        echo $proxy->port.'<br />';
+        $curl = curl_init();
+		curl_setopt_array($curl, array(
+		CURLOPT_URL => $targetUrl,
+		CURLOPT_RETURNTRANSFER => true,
+		CURLOPT_ENCODING => '',
+		CURLOPT_USERAGENT => 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)',
+		CURLOPT_MAXREDIRS => 10,
+		CURLOPT_TIMEOUT => 0,
+		CURLOPT_FOLLOWLOCATION => true,
+		CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+		CURLOPT_CUSTOMREQUEST => 'GET',
+		CURLOPT_SSL_VERIFYPEER => true,
+		CURLOPT_HTTPAUTH => CURLAUTH_BASIC
+		));
+        curl_setopt($curl, CURLOPT_PROXY, $proxy->port);
+		$response = curl_exec($curl);
+		$info = curl_getinfo($curl);
+		curl_close($curl);
+        echo '<pre>';
+        print_r($info);
+        echo '</pre>';
+        echo $response;
+        die();
+        $hasProxies = 1;
+        $parsed = 0;
+        if($proxy !== null){
+            $client = new Client([[
+                RequestOptions::PROXY => $proxy->port,
+                RequestOptions::VERIFY => false, # disable SSL certificate validation
+                RequestOptions::TIMEOUT => 30, # timeout of 30 seconds
+                RequestOptions::HEADERS => [
+                    // 'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 OPR/106.0.0.0'
+                    'user-agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 OPR/106.0.0.0',
+                    // 'accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
+                ],
+            ]]);
+            // $client->setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36');
+            // $client->setDefaultHeaders(['User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36']);
+            // $client->setServerParameter('user-agent', "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 OPR/106.0.0.0");
+            try {
+                $body = $client->get($targetUrl)->getBody();
+                $proxy->lastUsed = date('Y-m-d H:i:s');
+                $proxy->save();
+            } catch (\Exception $e) {
+                $proxy->status = 0;
+                $proxy->save();
+                echo $e->getMessage().'<br />';
+                die();
+            }
+            $crawler = new Crawler($body->getContents());
+            try {
+                try {
+                    $name = $crawler->filter('.IC_Price .price-value'); // Name
+                    print_r($name);
+                } catch (\Exception $e) {
+                    $parsed = 1;
+                    echo $e->getMessage().'<br />';
+                }
+            } catch (\Exception $e) {
+                echo $e->getMessage().'<br />';
+            }
+            //*/
+            $parsed = 1;
+        }else{
+            $hasProxies = 0;
+        }
+    }
+
     public function scrapeSearch()
     {
         $companyProducts = CompanyProduct::where('searched', '=', 0)

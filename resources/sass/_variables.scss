@@ -1,13 +1,40 @@
 // Body
-$body-bg: #f8fafc;
+$body-bg: #f8f8f8;
+
+$border-radius: 0;
+$box-shadow: 0 4px 25px 0 rgba(0,0,0,.1);
+
+$primary: #2196f3;
+$gray-400: #eff2f7;
+$gray-600: #6c757d;
+$gray-700: #495057;
+$gray-800: #343a40;
+
+$link-decoration: none;
 
 // Typography
 $font-family-sans-serif: 'Nunito', sans-serif;
 $font-size-base: 1rem;
 $line-height-base: 1.6;
 
+// Buttons
+$btn-color: #fff;
+
 // Navbar
 $navbar-brand-font-size: 1.4rem;
 
 // Card
 $card-bg: #fff;
+
+$border-width:  1px ;
+$input-height-border: calc(#{$border-width} * 2) ; // stylelint-disable-line function-disallowed-list
+
+// scss-docs-start form-floating-variables
+$form-floating-height:                  add(3rem, $input-height-border) ;
+$form-floating-line-height:             1;
+$form-floating-padding-y:               .75rem ;
+$form-floating-label-height:            1.5em ;
+$form-floating-label-opacity:           .65 ;
+// scss-docs-end form-floating-variables
+
+$dropdown-link-color: $gray-600;

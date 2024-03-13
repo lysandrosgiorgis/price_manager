@@ -1,6 +1,25 @@
 #top{
     height: $headerTopHeight;
 }
+.search-box{
+    .search-icon-close{
+        display: none;
+    }
+    &.active{
+        .search-icon{
+            display: none;
+        }
+        .search-icon-close{
+            display: block;
+        }
+    }
+}
+.header-container{
+    .dropdown-toggle::after{
+        display: none;
+    }
+}
+
 .header-icon {
     text-decoration: none;
     color: #212529;

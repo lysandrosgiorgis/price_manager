@@ -1,0 +1,17 @@
+.min-dvh{
+    &-100{
+        min-height: 100vh;
+        min-height: 100dvh;
+    }
+}
+.mw-350px{
+    min-width: 350px;
+}
+.cursor-pointer{
+    cursor: pointer;
+}
+@media screen and (min-width: 768px){
+    .bg-md-gray-400{
+        background-color: $gray-400;
+    }
+}

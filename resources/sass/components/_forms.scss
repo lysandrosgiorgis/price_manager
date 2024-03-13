@@ -1,0 +1,8 @@
+.form-floating {
+    & > .form-control:focus ~ label::after,
+    & > .form-control:not(:placeholder-shown) ~ label::after,
+    & > .form-control-plaintext ~ label::after,
+    & > .form-select ~ label::after{
+        background-color: transparent;
+    }
+}

@@ -17,6 +17,7 @@
 @import "bootstrap/scss/variables-dark";
 
 // 4. Include any default map overrides here
+@import 'maps';
 
 // 5. Include remainder of required parts
 @import "bootstrap/scss/maps";
@@ -61,9 +62,14 @@
 @import "bootstrap/scss/utilities/api";
 
 // 8. Add additional custom code here
+@import "components/base";
 @import "components/sidebar";
 @import "components/header";
 @import "components/list";
+@import "components/forms";
+@import "components/buttons";
+@import "components/util";
+@import "fonts/themify-icons";
 @import "components/general";
 @import "components/home";
 @import "components/product";

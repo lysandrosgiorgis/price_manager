@@ -67,7 +67,7 @@
         </nav>
         <div id="main-page">
             <div id="top" class="navbar sticky-top bg-white p-2 justify-content-start border-bottom ">
-                <button type="button" class="btn border lh-1 ph-1" title="{{ __('Menu') }}" onclick="document.body.classList.toggle('activeMenu');">
+                <button type="button" class="btn btn-light border lh-1 ph-1" title="{{ __('Menu') }}" onclick="document.body.classList.toggle('activeMenu');">
                     <span class="fa fa-bars fs-4"></span>
                 </button>
                 <!-- Right Side Of Navbar -->

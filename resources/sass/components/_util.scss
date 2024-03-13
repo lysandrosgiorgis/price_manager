@@ -1,0 +1,13 @@
+.counter{
+    background-color: #ff3c7e;
+    border-radius: 50px;
+    color: #fff;
+    font-size: 10px;
+    line-height: 1;
+    padding: 3px 5.5px;
+    .counter-container &{
+        position: absolute;
+        top: 0;
+        right: 0;
+    }
+}

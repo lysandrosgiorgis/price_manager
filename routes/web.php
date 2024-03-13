@@ -18,12 +18,8 @@ use App\Http\Controllers\Dnd\DebugController;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
-
-Auth::routes();
-
+Auth::routes(['register' => false]);
+Route::get('/', [App\Http\Controllers\HomeController::class, 'index']);
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
 Route::controller(ProductController::class)->group(function(){
@@ -66,5 +62,6 @@ Route::controller(ProductUrlController::class)->group(function(){
 
 Route::controller(DebugController::class)->group(function(){
     Route::get('/dnd/debug/scrape', 'scrape')->name('scrape');
+    Route::get('/dnd/debug/scrape_talos', 'scrapeTalos')->name('scrapeTalos');
     Route::get('/dnd/debug/scrape-search', 'scrapeSearch')->name('scrape.search');
 });

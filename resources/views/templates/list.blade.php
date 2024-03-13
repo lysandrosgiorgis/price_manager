@@ -36,7 +36,7 @@
             </ul>
         @endif
         @if (isset($filters))
-            <button class="btn border mb-1 ms-1" type="button" data-bs-toggle="offcanvas" data-bs-target="#filters" aria-controls="filters">
+            <button class="btn btn-light border mb-1 ms-1" type="button" data-bs-toggle="offcanvas" data-bs-target="#filters" aria-controls="filters">
                 <span class="fa fa-filter"></span>
                 <span class="">Filters</span>
             </button>

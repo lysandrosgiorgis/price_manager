@@ -1,0 +1,17 @@
+.btn{
+    &-primary {
+        color: $btn-color;
+        &:focus,
+        &:focus-visible,
+        :not(.btn-check) + &.btn:active,
+        &:active,
+        &:hover {
+            color: $btn-color;
+        }
+    }
+    &-icon{
+        background-color: transparent;
+        border:0;
+
+    }
+}
