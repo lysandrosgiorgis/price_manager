@@ -563,9 +563,9 @@ class ProductController extends Controller
                 'value' => $request->input('has_lowest_price', ''),
                 'label' => __('Φθηνότερος'),
                 'options' => [
-                    'Επιλέξτε' => '',
                     'Ναι'      => 1,
                     'Οχι'      => 0,
+                    'Επιλέξτε' => '',
                 ]
             ],
             [
@@ -574,9 +574,9 @@ class ProductController extends Controller
                 'value' => $request->input('has_highest_price', ''),
                 'label' => __('Ακριβότερος'),
                 'options' => [
-                    'Επιλέξτε' => '',
                     'Ναι'      => 1,
                     'Οχι'      => 0,
+                    'Επιλέξτε' => '',
                 ]
             ],
             [
