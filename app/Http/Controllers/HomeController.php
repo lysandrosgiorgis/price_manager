@@ -33,51 +33,51 @@ class HomeController extends Controller
         $competitor_product_count     = CompanyProduct::where('url','!=',NULL)->distinct('product_id')->count();
         $no_competitor_products_count = $total_products_count-$competitor_product_count;
 
-        $lowest_products              = Product::leftJoin('products_companies', 'products.id', '=', 'products_companies.product_id')
+        $lowest_products              = Product::leftJoin('company_products', 'products.id', '=', 'company_products.product_id')
             ->select([
                 'products.id',
                 'products.name',
                 'products.image',
                 'products.final_price as price',
                 'products.updated_at',
-                'products_companies.company_id',
+                'company_products.company_id',
             ])
-            ->selectRaw('(SELECT final_price FROM competitor_product_prices cpp WHERE cpp.product_id = products.id ORDER BY cpp.date DESC, cpp.final_price ASC LIMIT 0,1) as competitor_price')
+            ->selectRaw('(SELECT final_price FROM company_product_prices cpp WHERE cpp.product_id = products.id ORDER BY cpp.date DESC, cpp.final_price ASC LIMIT 0,1) as competitor_price')
             ->where('products.has_lowest_price',1)->limit(5)->get();
 
-        $highest_products              = Product::leftJoin('products_companies', 'products.id', '=', 'products_companies.product_id')
+        $highest_products              = Product::leftJoin('company_products', 'products.id', '=', 'company_products.product_id')
             ->select([
                 'products.id',
                 'products.name',
                 'products.image',
                 'products.final_price as price',
                 'products.updated_at',
-                'products_companies.company_id',
+                'company_products.company_id',
             ])
-            ->selectRaw('(SELECT final_price FROM competitor_product_prices cpp WHERE cpp.product_id = products.id ORDER BY cpp.date DESC, cpp.final_price ASC LIMIT 0,1) as competitor_price')
+            ->selectRaw('(SELECT final_price FROM company_product_prices cpp WHERE cpp.product_id = products.id ORDER BY cpp.date DESC, cpp.final_price ASC LIMIT 0,1) as competitor_price')
             ->where('products.has_highest_price',1)->limit(5)->get();
 
-        $no_competitor_products              = Product::leftJoin('products_companies', 'products.id', '=', 'products_companies.product_id')
+        $no_competitor_products              = Product::leftJoin('company_products', 'products.id', '=', 'company_products.product_id')
             ->select([
                 'products.id',
                 'products.name',
                 'products.image',
                 'products.final_price as price',
                 'products.updated_at',
-                'products_companies.company_id',
+                'company_products.company_id',
             ])
-            ->where('products_companies.url','=',NULL)->limit(5)->get();
+            ->where('company_products.url','=',NULL)->limit(5)->get();
 
-        $latest_update_products              = Product::leftJoin('products_companies', 'products.id', '=', 'products_companies.product_id')
+        $latest_update_products              = Product::leftJoin('company_products', 'products.id', '=', 'company_products.product_id')
             ->select([
                 'products.id',
                 'products.name',
                 'products.image',
                 'products.final_price as price',
                 'products.updated_at',
-                'products_companies.company_id',
+                'company_products.company_id',
             ])
-            ->selectRaw('(SELECT final_price FROM competitor_product_prices cpp WHERE cpp.product_id = products.id ORDER BY cpp.date DESC, cpp.final_price ASC LIMIT 0,1) as competitor_price')
+            ->selectRaw('(SELECT final_price FROM company_product_prices cpp WHERE cpp.product_id = products.id ORDER BY cpp.date DESC, cpp.final_price ASC LIMIT 0,1) as competitor_price')
             ->whereDate('products.updated_at','=',date('Y-m-d'))->limit(5)->get();
 
         $data['lowest_products'] = [];
