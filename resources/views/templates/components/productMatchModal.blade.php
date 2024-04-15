@@ -36,6 +36,7 @@
                     const productMatch = document.createElement('div');
                     productMatch.classList.add('row');
                     productMatch.classList.add('mb-2');
+                    productMatch.classList.add('border-bottom');
                     productMatch.innerHTML = `
                         <div class="col-1">
                             <button type="button" class="btn btn-primary" onclick="connectCompanyProductToProduct('${id}', '${product.id}')" >
