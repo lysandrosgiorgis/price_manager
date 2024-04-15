@@ -763,8 +763,10 @@ class ProductController extends Controller
         // get company products mathing with the products of the other companies
         $companyProduct = CompanyProduct::findOrFail($request->input('id'));
         $json['name'] = $companyProduct->name;
+        $json['brand'] = $companyProduct->brand;
         $json['image'] = asset('storage/'.$companyProduct->image);
         $sql= "`cp`.`id` is NULL AND ";
+        $sql= "LOWER(`p`.`brand`) = LOWER('".$companyProduct->brand."') AND ";
         $sql.= "(";
         $clauses = [];
         if(!empty(trim($companyProduct->mpn))) {
