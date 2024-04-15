@@ -812,7 +812,7 @@ class ProductController extends Controller
             ->leftJoin('company_products as cp', function ($join)  use($companyProduct) {
                 $join->on('p.id', '=', 'cp.product_id')
                     ->where('cp.company_id', '=', $companyProduct->company_id);
-            })->whereNull('cp.id')->whereRaw("LOWER(p.brand) = '".mb_strtolower($companyProduct->brand)."'")->get();
+            })->whereNull('cp.id')->get();
 
         if(1){
             $matching = [];
