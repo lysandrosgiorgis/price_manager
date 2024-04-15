@@ -85,7 +85,7 @@ class ProductController extends Controller
                 'companies.name',
             ])
             ->where('product_id','=',$id)->get();
-
+        $product_competitors = [];
         foreach($competitotrs as $competitor) {
             $product_competitors[$competitor->company_id] = [
                 'company_id'  => $competitor->company_id,
@@ -105,8 +105,61 @@ class ProductController extends Controller
             'final_to'       =>  $product->final_to,
             'lowest_price'   =>  $product->lowest_price,
             'highest_price'  =>  $product->highest_price,
-            'chart'          => view('templates.column.chart', [
-                'id' => $product->id
+            'chart'                  => view('templates.column.chart', [
+                'id' => 'prices-'.$product->id,
+                'type' => 'arearange',
+                'title' => [
+                    'text' => '',
+                ],
+                'xAxis' => [
+                    'type' => 'datetime',
+                    'dateTimeLabelFormats' => [
+                        'millisecond' => '%d-%m',
+                        'second' => '%d-%m',
+                        'minute' => '%d-%m',
+                        'hour' => '%d-%m',
+                        'day' => '%d-%m-%Y',
+                        'month' => '%m-%Y',
+                        'year' => '%m-%Y',
+                    ],
+//                        'visible' => false,
+                ],
+                'yAxis' => [
+                    'title' => [
+                        'text' => ''
+                    ],
+                ],
+                'tooltip' => [
+                    'crosshairs' => true,
+                    'shared' => true,
+                    'valueSuffix' => '€',
+                    'xDateFormat' => '%d-%m-%Y'
+                ],
+                'legend' => [
+                    'enabled' => false,
+                ],
+                'plotOptions' => [
+                    'series' => [
+                        'lineWidth' => 1,
+                        'marker' => [
+//                                'enabled' => false,
+                            'states' => [
+                                'hover' => [
+                                    'enabled' => true,
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                'series' => [
+                    [
+                        'name' => 'Τιμή',
+                        'type'  => 'spline',
+                        'data' => ProductPrice::where('product_id', $product->id)->orderBy('date','asc')->get()->map(function ($productPrice) {
+                            return [strtotime($productPrice->date) * 1000, 1 * $productPrice->final_price , $productPrice->id];
+                        })->toArray(),
+                    ],
+                ],
             ]),
             'competitors'   => $product_competitors
         ];
