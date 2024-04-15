@@ -27,15 +27,15 @@ class UpdateProducts extends Command{
 
     public function handle()
     {
-        $steps = 5000;
-        $this->output->progressStart($steps);
+        $limit = $this->ask('How many products to update?');
+        $this->output->progressStart($limit);
 
         $companyProducts = CompanyProduct::where('searched', '=', 0)
             ->where(function (Builder $query) {
                 $query->where('url','=','')
                     ->orWhereNull('url');
             })
-            ->take(5000)->get();
+            ->take($limit)->get();
         foreach($companyProducts as $companyProduct){
             $this->output->progressAdvance();
             $found_urls = [];
@@ -45,36 +45,36 @@ class UpdateProducts extends Command{
             if($companyProduct->urls->count() > 0) continue;
             $targetUrls = [];
             if(!empty(trim($companyProduct->product->model))){
-                $targetUrl = 'https://www.electrocrete.gr/en/search?query='.$companyProduct->product->model;
-                $targetUrls[$companyProduct->product->model] = 'https://www.electrocrete.gr/en/search?query='.$companyProduct->product->model;
-                $targetUrls[str_replace(' ','',$companyProduct->product->model)] = 'https://www.electrocrete.gr/en/search?query='.str_replace(' ','',$companyProduct->product->model);
-                $targetUrls[str_replace('-','',$companyProduct->product->model)] = 'https://www.electrocrete.gr/en/search?query='.str_replace('-','',$companyProduct->product->model);
-                $targetUrls[str_replace(['-',' '],'',$companyProduct->product->model)] = 'https://www.electrocrete.gr/en/search?query='.str_replace(['-',' '],'',$companyProduct->product->model);
+                $targetUrl = 'https://www.electrocrete.gr/search?query='.$companyProduct->product->model;
+                $targetUrls[$companyProduct->product->model] = 'https://www.electrocrete.gr/search?query='.$companyProduct->product->model;
+                $targetUrls[str_replace(' ','',$companyProduct->product->model)] = 'https://www.electrocrete.gr/search?query='.str_replace(' ','',$companyProduct->product->model);
+                $targetUrls[str_replace('-','',$companyProduct->product->model)] = 'https://www.electrocrete.gr/search?query='.str_replace('-','',$companyProduct->product->model);
+                $targetUrls[str_replace(['-',' '],'',$companyProduct->product->model)] = 'https://www.electrocrete.gr/search?query='.str_replace(['-',' '],'',$companyProduct->product->model);
             }
             if(!empty(trim($companyProduct->product->mpn))){
-                $targetUrl = 'https://www.electrocrete.gr/en/search?query='.$companyProduct->product->mpn;
-                $targetUrls[$companyProduct->product->mpn] = 'https://www.electrocrete.gr/en/search?query='.$companyProduct->product->mpn;
-                $targetUrls[str_replace(' ','',$companyProduct->product->mpn)] = 'https://www.electrocrete.gr/en/search?query='.str_replace(' ','',$companyProduct->product->mpn);
-                $targetUrls[str_replace('-','',$companyProduct->product->mpn)] = 'https://www.electrocrete.gr/en/search?query='.str_replace('-','',$companyProduct->product->mpn);
-                $targetUrls[str_replace(['-',' '],'',$companyProduct->product->mpn)] = 'https://www.electrocrete.gr/en/search?query='.str_replace(['-',' '],'',$companyProduct->product->mpn);
+                $targetUrl = 'https://www.electrocrete.gr/search?query='.$companyProduct->product->mpn;
+                $targetUrls[$companyProduct->product->mpn] = 'https://www.electrocrete.gr/search?query='.$companyProduct->product->mpn;
+                $targetUrls[str_replace(' ','',$companyProduct->product->mpn)] = 'https://www.electrocrete.gr/search?query='.str_replace(' ','',$companyProduct->product->mpn);
+                $targetUrls[str_replace('-','',$companyProduct->product->mpn)] = 'https://www.electrocrete.gr/search?query='.str_replace('-','',$companyProduct->product->mpn);
+                $targetUrls[str_replace(['-',' '],'',$companyProduct->product->mpn)] = 'https://www.electrocrete.gr/search?query='.str_replace(['-',' '],'',$companyProduct->product->mpn);
             }
             if(!empty(trim($companyProduct->product->barcode))){
-                $targetUrl = 'https://www.electrocrete.gr/en/search?query='.$companyProduct->product->barcode;
-                $targetUrls[$companyProduct->product->barcode] = 'https://www.electrocrete.gr/en/search?query='.$companyProduct->product->barcode;
-                $targetUrls[str_replace(' ','',$companyProduct->product->barcode)] = 'https://www.electrocrete.gr/en/search?query='.str_replace(' ','',$companyProduct->product->barcode);
-                $targetUrls[str_replace('-','',$companyProduct->product->barcode)] = 'https://www.electrocrete.gr/en/search?query='.str_replace('-','',$companyProduct->product->barcode);
-                $targetUrls[str_replace(['-',' '],'',$companyProduct->product->barcode)] = 'https://www.electrocrete.gr/en/search?query='.str_replace(['-',' '],'',$companyProduct->product->barcode);
+                $targetUrl = 'https://www.electrocrete.gr/search?query='.$companyProduct->product->barcode;
+                $targetUrls[$companyProduct->product->barcode] = 'https://www.electrocrete.gr/search?query='.$companyProduct->product->barcode;
+                $targetUrls[str_replace(' ','',$companyProduct->product->barcode)] = 'https://www.electrocrete.gr/search?query='.str_replace(' ','',$companyProduct->product->barcode);
+                $targetUrls[str_replace('-','',$companyProduct->product->barcode)] = 'https://www.electrocrete.gr/search?query='.str_replace('-','',$companyProduct->product->barcode);
+                $targetUrls[str_replace(['-',' '],'',$companyProduct->product->barcode)] = 'https://www.electrocrete.gr/search?query='.str_replace(['-',' '],'',$companyProduct->product->barcode);
             }
             if(!empty(trim($companyProduct->product->sku))){
-                $targetUrl = 'https://www.electrocrete.gr/en/search?query='.$companyProduct->product->sku;
-                $targetUrls[$companyProduct->product->sku] = 'https://www.electrocrete.gr/en/search?query='.$companyProduct->product->sku;
-                $targetUrls[str_replace(' ','',$companyProduct->product->sku)] = 'https://www.electrocrete.gr/en/search?query='.str_replace(' ','',$companyProduct->product->sku);
-                $targetUrls[str_replace('-','',$companyProduct->product->sku)] = 'https://www.electrocrete.gr/en/search?query='.str_replace('-','',$companyProduct->product->sku);
-                $targetUrls[str_replace(['-',' '],'',$companyProduct->product->sku)] = 'https://www.electrocrete.gr/en/search?query='.str_replace(['-',' '],'',$companyProduct->product->sku);
+                $targetUrl = 'https://www.electrocrete.gr/search?query='.$companyProduct->product->sku;
+                $targetUrls[$companyProduct->product->sku] = 'https://www.electrocrete.gr/search?query='.$companyProduct->product->sku;
+                $targetUrls[str_replace(' ','',$companyProduct->product->sku)] = 'https://www.electrocrete.gr/search?query='.str_replace(' ','',$companyProduct->product->sku);
+                $targetUrls[str_replace('-','',$companyProduct->product->sku)] = 'https://www.electrocrete.gr/search?query='.str_replace('-','',$companyProduct->product->sku);
+                $targetUrls[str_replace(['-',' '],'',$companyProduct->product->sku)] = 'https://www.electrocrete.gr/search?query='.str_replace(['-',' '],'',$companyProduct->product->sku);
             }
             if(!empty(trim($companyProduct->product->name))){
-                $targetUrl = 'https://www.electrocrete.gr/en/search?query='.$companyProduct->product->name;
-                $targetUrls[] = 'https://www.electrocrete.gr/en/search?query='.$companyProduct->product->name;
+                $targetUrl = 'https://www.electrocrete.gr/search?query='.$companyProduct->product->name;
+                $targetUrls[] = 'https://www.electrocrete.gr/search?query='.$companyProduct->product->name;
             }
             if(empty($targetUrls)) continue;
             $hasProxies = 1;
@@ -113,9 +113,24 @@ class UpdateProducts extends Command{
                             $siteProducts = $crawler->filter('.product-teaser .image'); // Products
                             if($total->text() == 1){
                                 $this->info('FOUND ONE PRODUCT');
-                                $found = 1;
-                                $companyProduct->url = $siteProducts->eq(0)->attr('href');
-                                $companyProduct->save();
+                                foreach($siteProducts as $siteProduct){
+                                    $element = new Crawler($siteProduct);
+                                    if(isset($found_urls[$element->attr('href')])) {
+                                        $this->warn('URL IN LIST');
+                                        continue;
+                                    }
+                                    $productUrl = new ProductUrl;
+                                    $productUrl->product_company_id = $companyProduct->id;
+                                    $productUrl->name = $element->attr('title');
+                                    $productUrl->url = $element->attr('href');
+                                    $productUrl->save();
+                                    $found_urls[$element->attr('href')] = 1;
+                                    $this->question($element->attr('title'));
+                                    $this->question($element->attr('href'));
+                                }
+//                                $found = 1;
+//                                $companyProduct->url = $siteProducts->eq(0)->attr('href');
+//                                $companyProduct->save();
                             }else{
                                 if($siteProducts->count() > 0){
                                     $this->question('FOUND MANY PRODUCT');

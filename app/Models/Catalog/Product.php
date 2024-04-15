@@ -5,6 +5,8 @@ namespace App\Models\Catalog;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Competition\Product as CompanyProduct;
+use App\Models\Competition\ProductPrice as CompanyProductPrice;
+
 class Product extends Model
 {
     use HasFactory;
@@ -49,5 +51,22 @@ class Product extends Model
 
     public function companyProducts(){
         return $this->hasMany(CompanyProduct::class);
+    }
+
+    public function prices(){
+        return $this->hasMany(ProductPrice::class);
+    }
+
+    public function getCompetitionPriceRange(){
+        $companyProducts = $this->companyProducts->pluck('id')->toArray();
+        $prices = CompanyProductPrice::selectRaw('DATE(`date`) as `date`, MIN(price) as min, MAX(price) as max')->whereIn('product_id', $companyProducts)->groupBy('date')->get();
+
+        return $prices->map(function($price){
+            return [
+                'date' => $price->date,
+                'min' => $price->min,
+                'max' => $price->max
+            ];
+        });
     }
 }

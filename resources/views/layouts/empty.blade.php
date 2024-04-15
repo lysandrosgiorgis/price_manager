@@ -7,6 +7,7 @@
     <div id="app">
         @yield('content')
     </div>
+    @include('includes.footer')
     @stack('beforeBody')
 </body>
 </html>

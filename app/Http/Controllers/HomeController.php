@@ -110,7 +110,8 @@ class HomeController extends Controller
 
         $data['no_competitor_products'] = [];
         foreach($no_competitor_products as $product) {
-            $company = Company::findOrFail($product->company_id);
+            $company = Company::where('id', '=', $product->company_id)->first() ;
+            if (!$company) continue;
             $data['no_competitor_products'][$product->id] = [
                 'image'            => ($product->image) ? $product->image : 'https://place-hold.it/200?fbclid=IwAR2x7A8JE71lW1uDy5G-Q2J23DKTPetr8p-4S-64Hwl3tDtPb5eWg19Y2n0',
                 'link'             => 'catalog/product/info/'.$product->id,
@@ -124,7 +125,8 @@ class HomeController extends Controller
 
         $data['latest_update_products'] = [];
         foreach($latest_update_products as $product) {
-            $company = Company::findOrFail($product->company_id);
+            $company = Company::where('id', '=', $product->company_id)->first() ;
+            if (!$company) continue;
             $data['latest_update_products'][$product->id] = [
                 'image'            => ($product->image) ? $product->image : 'https://place-hold.it/200?fbclid=IwAR2x7A8JE71lW1uDy5G-Q2J23DKTPetr8p-4S-64Hwl3tDtPb5eWg19Y2n0',
                 'link'             => 'catalog/product/info/'.$product->id,

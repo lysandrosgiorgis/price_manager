@@ -40,6 +40,9 @@ class CompanyController extends Controller
         $company = new company();
         $company->name 		    = $request->name;
         $company->url 	        = $request->url;
+        $company->limit_param 	= $request->limit_param;
+        $company->limit_value 	= $request->limit_value;
+        $company->page_param 	= $request->page_param;
         $company->image 	    = $request->image;
         $company->status 	    = $request->status;
         $company->sync 	        = $request->sync;
@@ -62,7 +65,6 @@ class CompanyController extends Controller
     }
 
     public function update($id, Request $request){
-        $company = Company::findOrFail($id);
 
         $validatedData = $request->validate([
             'name' 		=> 'required',
@@ -70,9 +72,13 @@ class CompanyController extends Controller
             'status' 	=> 'required',
             'sync' 	    => 'required',
         ]);
+        $company = Company::findOrFail($id);
 
         $company->name 		    = $request->name;
         $company->url 	        = $request->url;
+        $company->limit_param 	= $request->limit_param;
+        $company->limit_value 	= $request->limit_value;
+        $company->page_param 	= $request->page_param;
         $company->image 	    = $request->image;
         $company->status 	    = $request->status;
         $company->sync 	        = $request->sync;
@@ -131,7 +137,10 @@ class CompanyController extends Controller
 
         $defaults = [
             'name'          => '',
-            'url'   => '',
+            'url'           => '',
+            'limit_param'   => '',
+            'limit_value'   => '',
+            'page_param'    => '',
             'image'         => '',
             'status'        => 'active',
             'sync'          => 'active',
@@ -161,6 +170,27 @@ class CompanyController extends Controller
                                 'type' 		=> 'text',
                                 'wide' 		=> 1,
                                 'value' 	=> old('url', $company ? $company->url : $defaults['url'] ),
+                                'error'     => '',
+                            ],
+                            [
+                                'name' 		=> 'limit_param',
+                                'label' 	=> __('Limit parameter'),
+                                'type' 		=> 'text',
+                                'value' 	=> old('limit_param', $company ? $company->limit_param : $defaults['limit_param'] ),
+                                'error'     => '',
+                            ],
+                            [
+                                'name' 		=> 'limit_value',
+                                'label' 	=> __('Limit value'),
+                                'type' 		=> 'text',
+                                'value' 	=> old('limit_value', $company ? $company->limit_value : $defaults['limit_value'] ),
+                                'error'     => '',
+                            ],
+                            [
+                                'name' 		=> 'page_param',
+                                'label' 	=> __('Page parameter'),
+                                'type' 		=> 'text',
+                                'value' 	=> old('page_param', $company ? $company->page_param : $defaults['page_param'] ),
                                 'error'     => '',
                             ],
                             [
@@ -231,6 +261,11 @@ class CompanyController extends Controller
             'icon' => 'fa fa-plus',
         ];
         $data['list']['columns'] = [
+            'image'      => [
+                'label' => __('Image'),
+                'class' => 'align-middle',
+                'width' => '120'
+            ],
             'name'      => [
                 'label' => __('Name'),
                 'class' => 'align-middle',
@@ -255,6 +290,9 @@ class CompanyController extends Controller
         $data['list']['pagination'] = $companies;
         foreach ($companies as $company){
             $list_item = [
+                'image' => view('templates.column.img', [
+                    'img' => ($company->image) ? $company->image : 'https://place-hold.it/200?fbclid=IwAR2x7A8JE71lW1uDy5G-Q2J23DKTPetr8p-4S-64Hwl3tDtPb5eWg19Y2n0',
+                ]),
                 'name'      => $company->name,
                 'status'    => view('templates.column.icon', [
                     'icon' => ($company->status == 'active') ? 'fa fa-check text-success' : 'fa fa-times text-danger',
@@ -306,5 +344,17 @@ class CompanyController extends Controller
         $company = Company::findOrFail($id);
         $company->delete();
         return redirect( route('competition.company') )->with('success','Company updated successfully');
+    }
+
+    public function autocomplete(Request $request){
+        $companies = Company::where('name', 'like', '%'.$request->input('name').'%')->get();
+        $data = [];
+        foreach($companies as $company){
+            $data[] = [
+                'value' => $company->id,
+                'label' => $company->name,
+            ];
+        }
+        return response()->json($data);
     }
 }

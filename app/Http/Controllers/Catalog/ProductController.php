@@ -5,8 +5,9 @@ namespace App\Http\Controllers\Catalog;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Catalog\Product;
+use App\Models\Catalog\ProductPrice;
 use App\Models\Competition\Company;
-use App\Models\Competition\Product as CompetitionProduct;
+use App\Models\Competition\Product as CompanyProduct;
 use App\Helpers\ExcelHelper;
 
 class ProductController extends Controller
@@ -75,7 +76,7 @@ class ProductController extends Controller
 
     public function info($id){
         $product      = Product::findOrFail($id);
-        $competitotrs = CompetitionProduct::leftJoin('companies', 'products_companies.company_id', '=', 'companies.id')
+        $competitotrs = CompanyProduct::leftJoin('companies', 'products_companies.company_id', '=', 'companies.id')
             ->select([
                 'products_companies.company_id',
                 'products_companies.url',
@@ -428,48 +429,18 @@ class ProductController extends Controller
                 'label' => __('% κερδοφορίας'),
                 'class' => 'align-middle',
             ],
-//            'mpn'      => [
-//                'label' => __('MPN'),
-//                'class' => 'align-middle',
-//            ],
-//            'sku'      => [
-//                'label' => __('SKU'),
-//                'class' => 'align-middle',
-//            ],
-//            'model'      => [
-//                'label' => __('Model'),
-//                'class' => 'align-middle',
-//            ],
-//            'model_02'      => [
-//                'label' => __('Model 2'),
-//                'class' => 'align-middle',
-//            ],
-//            'barcode'      => [
-//                'label' => __('Barcode'),
-//                'class' => 'align-middle',
-//            ],
-//            'status'    => [
-//                'label' => __('Status'),
-//                'class' => 'text-center align-middle',
-//                'width' => '10'
-//            ],
-//            'sync'      => [
-//                'label' => __('Sync'),
-//                'class' => 'text-center align-middle',
-//                'width' => '10'
-//            ],
         ];
         $data['list']['listActions'] = [
             'width' => '104',
         ];
         $data['list']['list_items'] = [];
 //        $products = Product::paginate($request->input('limit', 15));
-        $products = Product::filter($data['product_filters'])
-            ->paginate($request->input('limit', 15));
+        $products = Product::filter($data['product_filters'])->orderBy('system_last_update','desc')->paginate($request->input('limit', 15));
         $data['list']['pagination'] = $products;
         $min = strtotime('01-02-2024');
         $max = strtotime('08-03-2024');
         foreach ($products as $product){
+            $prices = $product->getCompetitionPriceRange();
             $val = rand($min, $max);
             $date = date('d-m-Y', $val);
             $list_item = [
@@ -478,21 +449,78 @@ class ProductController extends Controller
                 ]),
                 'name'                   => $product->name,
                 'chart'                  => view('templates.column.chart', [
-                    'id' => $product->id
+                    'id' => 'prices-'.$product->id,
+                    'type' => 'arearange',
+                    'title' => [
+                        'text' => '',
+                    ],
+                    'xAxis' => [
+                        'type' => 'datetime',
+                        'dateTimeLabelFormats' => [
+                            'millisecond' => '%d-%m',
+                            'second' => '%d-%m',
+                            'minute' => '%d-%m',
+                            'hour' => '%d-%m',
+                            'day' => '%m-%Y',
+                            'month' => '%m-%Y',
+                            'year' => '%m-%Y',
+                        ],
+//                        'visible' => false,
+                    ],
+                    'yAxis' => [
+                        'title' => [
+                            'text' => ''
+                        ],
+                    ],
+                    'tooltip' => [
+                        'crosshairs' => true,
+                        'shared' => true,
+                        'valueSuffix' => '€',
+                        'xDateFormat' => '%d-%m-%Y'
+                    ],
+                    'legend' => [
+                        'enabled' => false,
+                    ],
+                    'plotOptions' => [
+                        'series' => [
+                            'lineWidth' => 1,
+                            'marker' => [
+//                                'enabled' => false,
+                                'states' => [
+                                    'hover' => [
+                                        'enabled' => true,
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    'series' => [
+                        [
+                            'name' => 'Ανταγωνισμός',
+                            'data' => $prices,
+                        ],
+                        [
+                            'name' => 'Τιμή',
+                            'type'  => 'spline',
+                            'data' => ProductPrice::where('product_id', $product->id)->orderBy('date','asc')->get()->map(function ($productPrice) {
+                                return [strtotime($productPrice->date) * 1000, 1 * $productPrice->final_price , $productPrice->id];
+                            })->toArray(),
+                        ],
+                    ],
                 ]),
                 'position'               => $product->position,
                 'updated_at'             => date('Y-m-d', strtotime($product->updated_at)),
-                'cheapest'               => ($product->has_lowest_price) ? '<span class="fa fa-check text-success fs-3" aria-hidden="true" data-bs-toggle="tooltip" data-bs-title="Φθηνότερος"></span>' : 'competitor',
-                'cheapest_days'          => rand(1, 5),
-                'priciest'               => ($product->has_highest_price) ? '<span class="fa fa-check text-success fs-3" aria-hidden="true" data-bs-toggle="tooltip" data-bs-title="Φθηνότερος"></span>' : 'competitor',
-                'competitors_no'         => rand(1, 5),
-                'lowest_possible_price'  => rand(10, 1000).'.00€',
-                'highest_possible_price' => rand(10, 1000).'.00€',
-                'entersoft_update'       => '',
-                'entersoft_offer'        => rand(10, 1000).'.00€',
-                'value'                  => rand(10, 1000).'.00€',
-                'vendor_cover'           => rand(10, 1000).'.00€',
-                'profit_percentage'      => rand(0, 100).'%',
+                'cheapest'               => ($product->has_lowest_price > 0) ? '<span class="fa fa-check text-success fs-3" aria-hidden="true" data-bs-toggle="tooltip" data-bs-title="Φθηνότερος"></span>' : '',
+                'cheapest_days'          => '',
+                'priciest'               => ($product->has_highest_price > 0) ? '<span class="fa fa-check text-success fs-3" aria-hidden="true" data-bs-toggle="tooltip" data-bs-title="Φθηνότερος"></span>' : '',
+                'competitors_no'         => '',
+                'lowest_possible_price'  => '',
+                'highest_possible_price' => '',
+                'entersoft_update'       => $product->system_last_update,
+                'entersoft_offer'        => '',
+                'value'                  => '',
+                'vendor_cover'           => '',
+                'profit_percentage'      => '',
                 'sku'                    => $product->sku,
                 'mpn'                    => $product->mpn,
                 'model'                  => $product->model,
@@ -635,6 +663,18 @@ class ProductController extends Controller
         return redirect( route('catalog.product') )->with('success','Product updated successfully');
     }
 
+    public function autocomplete(Request $request){
+        $products = Product::where('name', 'like', '%'.$request->input('name').'%')->get();
+        $data = [];
+        foreach($products as $product){
+            $data[] = [
+                'value' => $product->id,
+                'label' => $product->name,
+            ];
+        }
+        return response()->json($data);
+    }
+
     public function importProducts(Request $request){
         $productsIndex = [];
         foreach(Product::all() as $product){
@@ -655,12 +695,38 @@ class ProductController extends Controller
             $newProduct->save();
 
             foreach($request->company as $company_id){
-                $competitionProduct = new CompetitionProduct();
-                $competitionProduct->product_id = $newProduct->id;
-                $competitionProduct->company_id = $company_id;
-                $competitionProduct->save();
+                $companyProduct = new CompanyProduct();
+                $companyProduct->product_id = $newProduct->id;
+                $companyProduct->company_id = $company_id;
+                $companyProduct->save();
             }
             $products[] = $row[0];
+        }
+    }
+
+    public function getMatchingProducts($id, Request $request){
+        // get company products mathing with the products of the other companies
+        $product = Product::findOrFail($id);
+
+        $companyProducts = CompanyProduct::whereOr([
+            ['model', '=', $product->mpn],
+            ['mpn', '=', $product->mpn],
+            ['sku', '=', $product->mpn],
+            ['barcode', '=', $product->mpn],
+
+            ['model', '=', $product->barcode],
+            ['mpn', '=', $product->barcode],
+            ['sku', '=', $product->barcode],
+            ['barcode', '=', $product->barcode],
+
+            ['model', '=', $product->sku],
+            ['mpn', '=', $product->sku],
+            ['sku', '=', $product->sku],
+            ['barcode', '=', $product->sku],
+        ])->get();
+        echo '<h3>Matching Products</h3>';
+        foreach($companyProducts as $companyProduct){
+            echo $companyProduct->id.': '.$companyProduct->name.'<br />';
         }
     }
 }

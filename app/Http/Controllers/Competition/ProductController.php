@@ -6,52 +6,235 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Catalog\Product;
 use App\Models\Competition\Product as CompanyProduct;
+use App\Models\Competition\ProductPrice as CompanyProductPrice;
 
 class ProductController extends Controller
 {
-    public function companyProductList(Request $request){
-        $data['page_title'] = __('Products');
-        $data['list']   = $this->getList($request);
-        return view('pages.companyProductList', $data);
+    private $filters = [
+        'product_id' => '',
+        'name' => '',
+        'sku' => '',
+        'mpn' => '',
+        'barcode' => '',
+        'brand' => '',
+        'status' => '',
+        'sync' => '',
+        'created_at' => '',
+        'updated_at' => '',
+        'sort' => '',
+        'order' => '',
+    ];
+
+    public function productList(Request $request){
+        $data['page_title'] = __('Competition Products');
+
+        $data['list'] = $this->getList($request);
+        return view('pages.list', $data);
     }
 
-    public function getList($request, $data = []){
-        $products = Product::paginate($request->input('limit', 15));
-        $data['list']['pagination'] = $products;
+    public function getList(Request $request, $data = []){
+        $url = [];
+        foreach($this->filters as $filter){
+            if (isset($this->request->get[$filter])) {
+                $url[] = $filter.'='.$this->request->get[$filter];
+            }
+        }
+        $data['product_filters'] = $request->all();
+
+
+        $data['list']['title'] = __('Products');
+
+        $data['list']['buttons']['top'][] = [
+            'class' => 'btn btn-success ',
+            'type'  => 'link',
+            'href'  => route('competition.product.create'),
+            'label' => __('Create product'),
+            'icon' => 'fa fa-plus',
+        ];
+        $data['list']['columns'] = [
+            'img'      => [
+                'label' => __('Εικόνα'),
+                'class' => 'align-middle',
+                'width' => 160,
+            ],
+            'name'      => [
+                'label' => __('Όνομα'),
+                'class' => 'align-middle',
+            ],
+            'chart'      => [
+                'label' => __('Chart'),
+                'class' => 'align-middle',
+            ],
+            'barcode'      => [
+                'label' => __('Barcode'),
+                'class' => 'align-middle',
+            ],
+            'position'      => [
+                'label' => __('Θέση'),
+                'class' => 'align-middle',
+            ],
+            'starting_price'      => [
+                'label'     => __('Price'),
+                'class'     => 'align-middle',
+            ],
+            'final_price'      => [
+                'label'    => __('Final price'),
+                'class'    => 'align-middle',
+            ],
+            'updated_at'      => [
+                'label' => __('Τελευταία Αλλαγή'),
+                'class' => 'align-middle',
+            ],
+        ];
         $data['list']['listActions'] = [
-            'width' => '156',
+            'width' => '104',
         ];
         $data['list']['list_items'] = [];
+        $products = CompanyProduct::filter($data['product_filters'])->paginate($request->input('limit', 15));
+        $data['list']['pagination'] = $products;
         foreach ($products as $product){
-            $company_products = $product->companyProducts;
-            $company_products_array = [];
-            foreach ($company_products as $companyProductIndex => $companyProductItem){
-                $urls = [];
-                foreach($companyProductItem->urls as $url){
-                    if($url->status == 'wrong') continue;
-                    $urls[] = $url;
-                }
-                $company_products_array[] = [
-                    'id'            => $companyProductItem->id,
-                    'company_name'  => $companyProductItem->company->name,
-                    'url'           => $companyProductItem->url,
-                    'urls'          => $urls,
-                    'update'        => route('competition.product.update', $companyProductItem->id),
-                    'delete'        => route('competition.product.delete', $companyProductItem->id),
-                ];
-            }
-            $product_item = [
-                'id'               => $product->id,
-                'name'             => $product->name,
-                'sku'              => $product->sku,
-                'mpn'              => $product->mpn,
-                'barcode'          => $product->barcode,
-                'starting_price'   => round($product->starting_price, 2),
-                'final_price'      => round($product->final_price, 2),
-                'company_products' => $company_products_array,
+            $companyProductPrice = CompanyProductPrice::where('product_id', $product->id)->orderBy('date','desc')->first();
+            $list_item = [
+                'img'                    => view('templates.column.img', [
+                    'img' => ($product->image) ? asset('storage/'.$product->image) : 'https://place-hold.it/200?fbclid=IwAR2x7A8JE71lW1uDy5G-Q2J23DKTPetr8p-4S-64Hwl3tDtPb5eWg19Y2n0',
+                ]),
+                'name'                   => $product->name,
+                'model'                  => $product->model,
+                'sku'                    => $product->sku,
+                'mpn'                    => $product->mpn,
+                'barcode'                => $product->barcode,
+                'brand'                  => $product->brand,
+                'updated_at'             => $product->updated_at,
+                'chart'                  => view('templates.column.chart', [
+                    'id' => 'prices-'.$product->id,
+                    'type' => 'spline',
+                    'title' => [
+                        'text' => '',
+                    ],
+                    'xAxis' => [
+                        'type' => 'datetime',
+                        'dateTimeLabelFormats' => [
+                            'millisecond' => '%d-%m',
+                            'second' => '%d-%m',
+                            'minute' => '%d-%m',
+                            'hour' => '%d-%m',
+                            'day' => '%m-%Y',
+                            'month' => '%m-%Y',
+                            'year' => '%m-%Y',
+                        ],
+//                        'visible' => false,
+                    ],
+                    'yAxis' => [
+                        'title' => [
+                            'text' => ''
+                        ],
+                    ],
+                    'tooltip' => [
+                        'crosshairs' => true,
+                        'shared' => true,
+                        'valueSuffix' => '€',
+                        'xDateFormat' => '%d-%m-%Y'
+                    ],
+                    'legend' => [
+                        'enabled' => false,
+                    ],
+                    'plotOptions' => [
+                        'series' => [
+                            'lineWidth' => 1,
+                            'marker' => [
+//                                'enabled' => false,
+                                'states' => [
+                                    'hover' => [
+                                        'enabled' => true,
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    'series' => [
+                        [
+                            'name' => 'Τιμή',
+                            'data' => CompanyProductPrice::where('product_id', $product->id)->orderBy('date','asc')->get()->map(function ($productPrice) {
+                                return [strtotime($productPrice->date) * 1000, 1 * $productPrice->final_price , $productPrice->id];
+                            })->toArray(),
+                        ],
+                    ],
+                ]),
+                'position'               => $product->position,
+                'starting_price'         => ($companyProductPrice->price != $companyProductPrice->final_price) ? $companyProductPrice->price : '',
+                'final_price'            => $companyProductPrice->final_price,
+                'status'                 => view('templates.column.icon', [
+                    'icon' => ($product->status == 'active') ? 'fa fa-check text-success' : 'fa fa-times text-danger',
+                    'label' => ($product->status == 'active') ? __('Active') : __('Inactive'),
+                    'tooltip' => 1,
+                    'hideLabel' => 1,
+                ]),
+                'sync'                   => view('templates.column.icon', [
+                    'icon' => ($product->sync == 'active') ? 'fa fa-check text-success' : 'fa fa-times text-danger',
+                    'label' => ($product->sync == 'active') ? __('Active') : __('Inactive'),
+                    'tooltip' => 1,
+                    'hideLabel' => 1,
+                ]),
             ];
-            $data['list']['list_items'][] = $product_item;
+            $list_item['actions']['info'] = [
+                'class'     => 'btn btn-success text-white btn-sm',
+                'type'      => 'link',
+                'href'      => route('competition.product.info', $product->id),
+                'label'     => __('Product info'),
+                'hideLabel' => 1,
+                'tooltip'   => 1,
+                'icon'      => 'fa fa-eye',
+            ];
+            $list_item['actions']['update'] = [
+                'class'     => 'btn btn-info text-white btn-sm',
+                'type'      => 'link',
+                'href'      => route('competition.product.update', $product->id),
+                'label'     => __('Update product'),
+                'hideLabel' => 1,
+                'tooltip'   => 1,
+                'icon'      => 'fa fa-pencil',
+            ];
+            $list_item['actions']['delete'] = [
+                'class'     => 'btn btn-danger btn-sm',
+                'type'      => 'button',
+                'action'    => "if(confirm('".__('Are you sure you want to delete?')."')){ window.location = '".route('competition.product.delete', $product->id)."';}",
+                'label'     => __('Delete product'),
+                'hideLabel' => 1,
+                'tooltip'   => 1,
+                'icon'      => 'fa fa-trash',
+            ];
+            $data['list']['list_items'][] = $list_item;
         }
+        $data['list']['visibleColumns'] = [
+            'img',
+            'name',
+            'chart',
+            'barcode',
+            'position',
+            'starting_price',
+            'final_price',
+        ];
+        $data['list']['filters_form'] = 'competition.product';
+        $data['list']['filters'] = [
+            [
+                'name'  => 'name',
+                'type'  => 'text',
+                'value' => $request->input('name', ''),
+                'label' => __('Όνομα'),
+            ],
+            [
+                'name'  => 'barcode',
+                'type'  => 'text',
+                'value' => $request->input('barcode', ''),
+                'label' => __('Barcode'),
+            ],
+            [
+                'name'  => 'position',
+                'type'  => 'text',
+                'value' => $request->input('position', ''),
+                'label' => __('Θέση'),
+            ],
+        ];
 
         return $data['list'];
     }
@@ -68,14 +251,18 @@ class ProductController extends Controller
         $companyProduct = CompanyProduct::findOrFail($id);
 
         $validatedData = $request->validate([
-//            'name' 		=> 'required',
             'status' 	=> 'required',
             'sync' 	    => 'required',
         ]);
 
-//        $companyProduct->name 		    = $request->name;
+        $companyProduct->product_id 	= $request->product_id;
+        $companyProduct->company_id 	= $request->company_id;
+        $companyProduct->mpn 	        = $request->mpn;
+        $companyProduct->sku 	        = $request->sku;
+        $companyProduct->barcode 	    = $request->barcode;
+        $companyProduct->brand 	        = $request->brand;
         $companyProduct->url 	        = $request->url;
-//        $companyProduct->image 	        = $request->image;
+        $companyProduct->image 	        = $request->image;
         $companyProduct->status 	    = $request->status;
         $companyProduct->sync 	        = $request->sync;
         $companyProduct->save();
@@ -89,15 +276,15 @@ class ProductController extends Controller
     }
 
     public function getForm(CompanyProduct $companyProduct = null){
-//        $url = [];
-//        foreach($this->filters as $filter){
-//            if (isset($this->request->get[$filter])) {
-//                $url[] = $filter.'='.$this->request->get[$filter];
-//            }
-//        }
+        $url = [];
+        foreach($this->filters as $filter){
+            if (isset($this->request->get[$filter])) {
+                $url[] = $filter.'='.$this->request->get[$filter];
+            }
+        }
 
         if($companyProduct){
-            $data['pageTitle'] = __('Edit :companyName', ['companyName' => $companyProduct->name]);
+            $data['pageTitle'] = __('Edit :Name', ['Name' => $companyProduct->name]);
             $data['form']['action'] = route('competition.product.update', $companyProduct->id);
             $data['form']['id'] = 'catalogCompanyUpdate';
         }else{
@@ -132,7 +319,15 @@ class ProductController extends Controller
         ];
 
         $defaults = [
+            'product_id'    => '',
+            'company_id'    => '',
             'name'          => '',
+            'description'   => '',
+            'model'         => '',
+            'mpn'           => '',
+            'sku'           => '',
+            'barcode'       => '',
+            'brand'         => '',
             'url'           => '',
             'image'         => '',
             'status'        => 'active',
@@ -149,20 +344,57 @@ class ProductController extends Controller
                     [
                         'legend'    => false,
                         'fields' 	=> [
-//                            [
-//                                'name' 		=> 'name',
-//                                'label' 	=> __('Name'),
-//                                'type' 		=> 'text',
-//                                'wide' 		=> 1,
-//                                'value' 	=> old('name', $companyProduct ? $companyProduct->name : $defaults['name'] ),
-//                                'error'     => '',
-//                            ],
+                            [
+                                'name' 		=> 'name',
+                                'label' 	=> __('Name'),
+                                'type' 		=> 'text',
+                                'wide' 		=> 1,
+                                'disabled' 	=> 1,
+                                'value' 	=> old('name', $companyProduct ? $companyProduct->name : $defaults['name'] ),
+                                'error'     => '',
+                            ],
                             [
                                 'name' 		=> 'url',
                                 'label' 	=> __('URL'),
                                 'type' 		=> 'text',
                                 'wide' 		=> 1,
                                 'value' 	=> old('url', $companyProduct ? $companyProduct->url : $defaults['url'] ),
+                                'error'     => '',
+                            ],
+                            [
+                                'name' 		=> 'image',
+                                'label' 	=> __('Image'),
+                                'type' 		=> 'image',
+                                'wide' 		=> 1,
+                                'value' 	=> old('image', $companyProduct ? asset('storage/'.$companyProduct->image) : $defaults['image'] ),
+                                'error'     => '',
+                            ],
+                            [
+                                'name' 		            => 'product_id',
+                                'label' 	            => __('Main Product'),
+                                'autocomplete_name'     => 'product',
+                                'autocomplete_value'    => old('product', $companyProduct && $companyProduct->product_id ? $companyProduct->product->name : '' ),
+                                'type' 		            => 'autocomplete',
+                                'source'                => route('catalog.product.autocomplete'),
+                                'value' 	            => old('product_id', $companyProduct ? $companyProduct->product_id : $defaults['product_id'] ),
+                                'error'                 => '',
+                            ],
+                            [
+                                'name' 		            => 'company_id',
+                                'label' 	            => __('Company'),
+                                'autocomplete_name'     => 'company',
+                                'autocomplete_value'    => old('company', $companyProduct && $companyProduct->company_id ? $companyProduct->company->name : '' ),
+                                'type' 		            => 'autocomplete',
+                                'source'                => route('competition.company.autocomplete'),
+                                'value' 	            => old('company_id', $companyProduct ? $companyProduct->company_id : $defaults['company_id'] ),
+                                'error'                 => '',
+                            ],
+                            [
+                                'name' 		=> 'description',
+                                'label' 	=> __('Description'),
+                                'type' 		=> 'textarea',
+                                'wide' 		=> 1,
+                                'value' 	=> old('url', $companyProduct ? $companyProduct->description : $defaults['description'] ),
                                 'error'     => '',
                             ],
                             [
@@ -203,6 +435,60 @@ class ProductController extends Controller
                     ],
                 ],
             ],
+            [
+                'label' 	=> __('Data'),
+                'fieldsets' => [
+                    [
+                        'legend'    => false,
+                        'fields' 	=> [
+                                [
+                                    'name' 		=> 'model',
+                                    'label' 	=> __('Model'),
+                                    'type' 		=> 'text',
+                                    'value' 	=> old('model', $companyProduct ? $companyProduct->model : $defaults['model'] ),
+                                    'error'     => '',
+                                ],
+                                [
+                                    'name' 		=> 'sku',
+                                    'label' 	=> __('SKU'),
+                                    'type' 		=> 'text',
+                                    'value' 	=> old('sku', $companyProduct ? $companyProduct->sku : $defaults['sku'] ),
+                                    'error'     => '',
+                                ],
+                                [
+                                    'name' 		=> 'mpn',
+                                    'label' 	=> __('MPN'),
+                                    'type' 		=> 'text',
+                                    'value' 	=> old('mpn', $companyProduct ? $companyProduct->mpn : $defaults['mpn'] ),
+                                    'error'     => '',
+                                ],
+                                [
+                                    'name' 		=> 'barcode',
+                                    'label' 	=> __('Barcode'),
+                                    'type' 		=> 'text',
+                                    'value' 	=> old('barcode', $companyProduct ? $companyProduct->barcode : $defaults['barcode'] ),
+                                    'error'     => '',
+                                ],
+                                [
+                                    'name' 		=> 'created_at',
+                                    'label' 	=> __('Created At'),
+                                    'type' 		=> 'text',
+                                    'disabled' 	=> 1,
+                                    'value' 	=> old('created_at', $companyProduct ? $companyProduct->created_at : $defaults['created_at'] ),
+                                    'error'     => '',
+                                ],
+                                [
+                                    'name' 		=> 'updated_at',
+                                    'label' 	=> __('Updated At'),
+                                    'type' 		=> 'text',
+                                    'disabled' 	=> 1,
+                                    'value' 	=> old('updated_at', $companyProduct ? $companyProduct->updated_at : $defaults['updated_at'] ),
+                                    'error'     => '',
+                                ],
+                            ],
+                    ],
+                ],
+            ],
         ];
 
         return $data;
@@ -211,6 +497,7 @@ class ProductController extends Controller
     public function delete($id, Request $request){
         $company_product = CompanyProduct::findOrFail($id);
         $company_product->delete();
+        $company_product = CompanyProductPrice::where('product_id','=', $id)->delete();
         return redirect( route('competition.product') )->with('success','Product updated successfully');
     }
 }

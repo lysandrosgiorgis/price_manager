@@ -6,7 +6,7 @@
                 <div class="card-body">
                     <div class="card-header">
                         #{{ $productItem['id'] }} {{ $productItem['name'] }}
-                        @if($productItem['final_price'])
+                        @if($productItem['final_price'] != $productItem['starting_price'])
                             <span class="float-end px-2">{{ $productItem['final_price'] }}€</span>
                             <span class="float-end px-2"><s>{{ $productItem['starting_price'] }}€</s></span>
                         @else
