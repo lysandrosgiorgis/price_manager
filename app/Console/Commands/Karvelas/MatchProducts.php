@@ -66,7 +66,7 @@ class MatchProducts extends Command{
             }
 
             $companyProducts = CompanyProduct::whereNull('product_id')->get();
-            if(1){
+            if(0){
                 $this->info('similar_text');
                 $matching = [];
                 foreach ($companyProducts as $companyProduct) {
@@ -90,7 +90,7 @@ class MatchProducts extends Command{
                     }
                 }
             }
-            if(1){
+            if(0){
                 $this->info('levenshtein');
                 $matching = [];
                 foreach ($companyProducts as $companyProduct) {
@@ -114,7 +114,7 @@ class MatchProducts extends Command{
                     }
                 }
             }
-            if(1){
+            if(0){
                 $this->info('similar_text skroutz');
                 $companyProducts = CompanyProduct::whereNull('product_id')->get();
                 $matching = [];

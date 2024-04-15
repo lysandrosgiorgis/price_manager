@@ -3,10 +3,10 @@
     <div class="card mb-3">
         <div class="card-body">
             <div class="product-info-header d-flex">
-                <div class="me-3">
-                    <img src="{{ $image }}" class="img-fluid" width="200"/>
+                <div class="me-3 ">
+                    <img src="{{ $image }}" class="img-fluid " width="200"/>
                 </div>
-                <div class="">
+                <div class="flex-grow-1">
                     <span>{{ $name }}</span>
                     <div class="row mt-3">
                         <div class="col-sm-12 col-md-12 col-lg-6 ms-auto mb-2">

@@ -39,7 +39,8 @@ Route::controller(ProductController::class)->group(function(){
     Route::get('/catalog/product/delete/{id}', 'delete')->name('catalog.product.delete');
     Route::post('/catalog/product/import', 'importProducts')->name('catalog.product.import');
     Route::any('/catalog/product/autocomplete', 'autocomplete')->name('catalog.product.autocomplete');
-    Route::any('/catalog/product/get_matches/{id}', 'getMatchingProducts')->name('catalog.product.getMatchingProducts');
+    Route::any('/catalog/product/get_matches', 'getMatchingProducts')->name('catalog.product.getMatchingProducts');
+    Route::any('/catalog/product/connect_product_with_competition', 'connectCompanyProductToProduct')->name('catalog.product.connectCompanyProductToProduct');
 });
 
 Route::controller(CategoryController::class)->group(function(){

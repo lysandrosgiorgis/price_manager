@@ -9,6 +9,7 @@ use App\Models\Catalog\ProductPrice;
 use App\Models\Competition\Company;
 use App\Models\Competition\Product as CompanyProduct;
 use App\Helpers\ExcelHelper;
+use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
@@ -757,29 +758,178 @@ class ProductController extends Controller
         }
     }
 
-    public function getMatchingProducts($id, Request $request){
+    public function getMatchingProducts(Request $request){
+        $json = [];
         // get company products mathing with the products of the other companies
-        $product = Product::findOrFail($id);
-
-        $companyProducts = CompanyProduct::whereOr([
-            ['model', '=', $product->mpn],
-            ['mpn', '=', $product->mpn],
-            ['sku', '=', $product->mpn],
-            ['barcode', '=', $product->mpn],
-
-            ['model', '=', $product->barcode],
-            ['mpn', '=', $product->barcode],
-            ['sku', '=', $product->barcode],
-            ['barcode', '=', $product->barcode],
-
-            ['model', '=', $product->sku],
-            ['mpn', '=', $product->sku],
-            ['sku', '=', $product->sku],
-            ['barcode', '=', $product->sku],
-        ])->get();
-        echo '<h3>Matching Products</h3>';
-        foreach($companyProducts as $companyProduct){
-            echo $companyProduct->id.': '.$companyProduct->name.'<br />';
+        $companyProduct = CompanyProduct::findOrFail($request->input('id'));
+        $json['name'] = $companyProduct->name;
+        $json['image'] = asset('storage/'.$companyProduct->image);
+        $sql= "`cp`.`id` is NULL AND ";
+        $sql.= "(";
+        $clauses = [];
+        if(!empty(trim($companyProduct->mpn))) {
+            $clauses[] = "p.`model` = '".$companyProduct->mpn."' ";
+            $clauses[] = "p.`mpn` = '".$companyProduct->mpn."' ";
+            $clauses[] = "p.`sku` = '".$companyProduct->mpn."' ";
+            $clauses[] = "p.`barcode` = '".$companyProduct->mpn."' ";
         }
+        if(!empty(trim($companyProduct->barcode))) {
+            $clauses[] =  "p.`model` = '".$companyProduct->barcode."' ";
+            $clauses[] =  "p.`mpn` = '".$companyProduct->barcode."' ";
+            $clauses[] =  "p.`sku` = '".$companyProduct->barcode."' ";
+            $clauses[] =  "p.`barcode` = '".$companyProduct->barcode."' ";
+        }
+        if(!empty(trim($companyProduct->sku))) {
+            $clauses[] = "p.`model` = '".$companyProduct->sku."' ";
+            $clauses[] = "p.`mpn` = '".$companyProduct->sku."' ";
+            $clauses[] = "p.`sku` = '".$companyProduct->sku."' ";
+            $clauses[] = "p.`barcode` = '".$companyProduct->sku."' ";
+        }
+
+        $sql.= implode('OR ', $clauses);
+        $sql.= ")";
+        $products = DB::table('products as p')->selectRaw("`p`.*, `cp`.`id` ")
+            ->leftJoin('company_products as cp', function ($join)  use($companyProduct) {
+                $join->on('p.id', '=', 'cp.product_id')
+                    ->where('cp.company_id', '=', $companyProduct->company_id);
+            })
+            ->whereRaw($sql)->get();
+        $json['skuMatches'] = [];
+        $json['matches'] = [];
+        if($products->count() > 0){
+            foreach($products as $product){
+                $json['skuMatches'][] = [
+                    'id' => $product->id,
+                    'name' => $product->name
+                ];
+                $json['matches'][$product->id] = $product;
+            }
+        }
+
+        $products = DB::table('products as p')->selectRaw("`p`.* ")
+            ->leftJoin('company_products as cp', function ($join)  use($companyProduct) {
+                $join->on('p.id', '=', 'cp.product_id')
+                    ->where('cp.company_id', '=', $companyProduct->company_id);
+            })->whereNull('cp.id')->get();
+
+        if(1){
+            $matching = [];
+            foreach ($products as $product) {
+                $similar = similar_text(mb_strtolower($product->name), mb_strtolower($companyProduct->name));
+                if($similar > 30){
+                    $matching[] = [
+                        'product' => $product,
+                        'id' => $companyProduct->id,
+                        'name' => mb_strtolower($product->name),
+                        'name2' => mb_strtolower($companyProduct->name),
+                        'similar' => $similar
+                    ];
+                }
+            }
+            usort($matching, function($a, $b) {
+                return $a['similar'] <= $b['similar'];
+            });
+            foreach($matching as $index => $match){
+                $json['nameMatches'][] = $match['product'];
+                $json['matches'][$match['product']->id] = $match['product'];
+//                $this->line($index.': '.$match['name'].' - '.$match['name2'].' - '.$match['similar']);
+                if($index > 10){
+                    break;
+                }
+            }
+        }
+        if(1){
+            $matching = [];
+            foreach ($products as $product) {
+                $similar = levenshtein(mb_strtolower($product->name), mb_strtolower($companyProduct->name));
+                if($similar < 10){
+                    $matching[] = [
+                        'product' => $product,
+                        'id' => $companyProduct->id,
+                        'name' => mb_strtolower($product->name),
+                        'name2' => mb_strtolower($companyProduct->name),
+                        'similar' => $similar
+                    ];
+                }
+            }
+            usort($matching, function($a, $b) {
+                return $a['similar'] >= $b['similar'];
+            });
+            foreach($matching as $index => $match){
+                $json['nameLevenshteinMatches'][] = $match['product'];
+                $json['matches'][$match['product']->id] = $match['product'];
+                if($index > 10){
+                    break;
+                }
+            }
+        }
+        if(1){
+            $matching = [];
+            foreach ($products as $product) {
+                $similar = similar_text(mb_strtolower($product->name2), mb_strtolower($companyProduct->name));
+                if($similar > 30) {
+                    $matching[] = [
+                        'product' => $product,
+                        'id' => $companyProduct->id,
+                        'name' => mb_strtolower($product->name2),
+                        'name2' => mb_strtolower($companyProduct->name),
+                        'similar' => $similar
+                    ];
+                }
+            }
+            usort($matching, function($a, $b) {
+                return $a['similar'] <= $b['similar'];
+            });
+
+            foreach($matching as $index => $match){
+                $json['matches'][$match['product']->id] = $match['product'];
+                $json['skroutzNameMatches'][] = $match['product'];
+                if($index > 10){
+                    break;
+                }
+            }
+        }
+        if(1){
+            $matching = [];
+            foreach ($products as $product) {
+                $similar = levenshtein(mb_strtolower($product->name2), mb_strtolower($companyProduct->name));
+                if($similar < 10) {
+                    $matching[] = [
+                        'product' => $product,
+                        'id' => $companyProduct->id,
+                        'name' => mb_strtolower($product->name2),
+                        'name2' => mb_strtolower($companyProduct->name),
+                        'similar' => $similar
+                    ];
+                }
+            }
+            usort($matching, function($a, $b) {
+                return $a['similar'] >= $b['similar'];
+            });
+            foreach($matching as $index => $match){
+                $json['skroutzNameLevenshteinMatches'][] = $match['product'];
+                $json['matches'][$match['product']->id] = $match['product'];
+                if($index > 10){
+                    break;
+                }
+            }
+        }
+
+        return response()->json($json);
+    }
+
+    public function connectCompanyProductToProduct(Request $request)
+    {
+        $companyProduct = CompanyProduct::find($request->company_product_id);
+        $product = Product::find($request->product_id);
+        $companyProduct->product_id = $product->id;
+        $companyProduct->save();
+
+        $json = [];
+        $json['companyProduct'] = $companyProduct;
+        $json['status'] = 1;
+        $json['message'] = __('The products have been connected successfully');
+
+        return response()->json($json);
     }
 }

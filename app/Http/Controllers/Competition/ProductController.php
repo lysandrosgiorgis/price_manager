@@ -57,6 +57,11 @@ class ProductController extends Controller
                 'class' => 'align-middle',
                 'width' => 160,
             ],
+            'product_id'      => [
+                'label' => __('Κεντρικό προϊόν'),
+                'class' => 'align-middle',
+                'hideLabel' => 1,
+            ],
             'name'      => [
                 'label' => __('Όνομα'),
                 'class' => 'align-middle',
@@ -92,11 +97,20 @@ class ProductController extends Controller
         $data['list']['list_items'] = [];
         $products = CompanyProduct::filter($data['product_filters'])->paginate($request->input('limit', 15));
         $data['list']['pagination'] = $products;
+        $data['list']['beforeBody'][] = 'templates.components.productMatchModal';
         foreach ($products as $product){
             $companyProductPrice = CompanyProductPrice::where('product_id', $product->id)->orderBy('date','desc')->first();
+
             $list_item = [
                 'img'                    => view('templates.column.img', [
                     'img' => ($product->image) ? asset('storage/'.$product->image) : 'https://place-hold.it/200?fbclid=IwAR2x7A8JE71lW1uDy5G-Q2J23DKTPetr8p-4S-64Hwl3tDtPb5eWg19Y2n0',
+                ]),
+                'product_id'             => view('templates.column.icon', [
+                    'icon'      => ($product->product_id) ? 'fa fa-link' : 'fa fa-link-slash',
+                    'hideLabel' => 1,
+                    'label'     => ($product->product_id) ? $product->product->name : 'Αντιστοίχιση',
+                    'tooltip'   =>1,
+                    'action'    => ($product->product_id) ? 'onclick="location=\''.route('catalog.product.info',$product->product_id).'\'"' : 'onclick="findProductMatch('.$product->id.')"',
                 ]),
                 'name'                   => $product->name,
                 'model'                  => $product->model,
