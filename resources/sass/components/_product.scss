@@ -1,5 +1,9 @@
 .product-competitors-table {
     .chart-container {
-        max-height: 200px;
+        max-height: 150px;
+        max-width: 350px;
     }
+}
+#productPagePriceCart .chart-container{
+    max-height: 250px;
 }

@@ -48,7 +48,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="row mt-3">
+                    <div class="row mt-3" id="productPagePriceCart">
                         {!!  $chart !!}
                     </div>
                 </div>
@@ -70,15 +70,20 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($competitors as $competitor)
+                        @foreach($companyProducts as $companyProduct)
                             <tr>
-                                <td>{{ $competitor['name']  }}</td>
-                                <td class="column-chart">{!! $chart !!}</td>
-                                <td class="plus-price fw-bold">10.00€</td>
-                                <td>{{ $competitor['updated_at']  }}</td>
-                                <td class="text-center"><a href="{{ $competitor['url']  }}" target="_blank" class="btn btn-warning text-white"><span class="fa-solid fa-link"></span></a></td>
+                                <td>{!! $companyProduct['company'] !!}</td>
+                                <td class="column-chart">{!! $companyProduct['chart'] !!}</td>
+                                <td class="fw-bold">
+                                    @if($companyProduct['price'] != $companyProduct['final_price'])
+                                        <del >{{ $companyProduct['price'] }}</del>
+                                    @endif
+                                    {{ $companyProduct['final_price']  }}
+                                </td>
+                                <td>{{ $companyProduct['updated_at']  }}</td>
+                                <td class="text-center"><a href="{{ $companyProduct['url']  }}" target="_blank" class="btn btn-warning text-white"><span class="fa-solid fa-link"></span></a></td>
                                 <td class="text-center">
-                                    <button type="button" class="btn btn-info text-white" data-bs-toggle="modal" data-bs-target="#desc-{{ $competitor['company_id']  }}">
+                                    <button type="button" class="btn btn-info text-white" data-bs-toggle="modal" data-bs-target="#desc-{{ $companyProduct['company_id']  }}">
                                         <span class="fa-solid fa-circle-info"></span>
                                     </button>
                                 </td>
@@ -90,8 +95,8 @@
         </div>
     </div>
     <!-- Modal -->
-    @foreach($competitors as $competitor)
-        <div class="modal fade bd-example-modal-xl" id="desc-{{ $competitor['company_id']  }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+    @foreach($companyProducts as $companyProduct)
+        <div class="modal fade bd-example-modal-xl" id="desc-{{ $companyProduct['company_id']  }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
             <div class="modal-dialog modal-xl" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -101,7 +106,7 @@
                         </button>
                     </div>
                     <div class="modal-body">
-                        {!! $competitor['description'] !!}
+                        {!! $companyProduct['description'] !!}
                     </div>
                 </div>
             </div>

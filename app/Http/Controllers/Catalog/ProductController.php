@@ -8,6 +8,7 @@ use App\Models\Catalog\Product;
 use App\Models\Catalog\ProductPrice;
 use App\Models\Competition\Company;
 use App\Models\Competition\Product as CompanyProduct;
+use App\Models\Competition\ProductPrice as CompanyProductPrice;
 use App\Helpers\ExcelHelper;
 use Illuminate\Support\Facades\DB;
 
@@ -77,23 +78,76 @@ class ProductController extends Controller
 
     public function info($id){
         $product      = Product::findOrFail($id);
-        $competitotrs = CompanyProduct::leftJoin('companies', 'company_products.company_id', '=', 'companies.id')
-            ->select([
-                'company_products.company_id',
-                'company_products.url',
-                'company_products.description',
-                'company_products.updated_at',
-                'companies.name',
-            ])
-            ->where('product_id','=',$id)->get();
-        $product_competitors = [];
-        foreach($competitotrs as $competitor) {
-            $product_competitors[$competitor->company_id] = [
-                'company_id'  => $competitor->company_id,
-                'name'        => $competitor->name,
-                'url'         => $competitor->url,
-                'description' => $competitor->description,
-                'updated_at'  => date('Y-m-d',strtotime($competitor->updated_at)),
+        $companyProducts = CompanyProduct::where('product_id','=',$id)->get();
+        $productCompetitors = [];
+        foreach($companyProducts as $companyProduct) {
+            $productCompetitors[$companyProduct->company_id] = [
+                'company_id'    => $companyProduct->company_id,
+                'company'     => $companyProduct->company->image ? view('templates.column.img', [
+                    'img' => $companyProduct->company->image,
+                ]) : $companyProduct->company->name,
+                'name'        => $companyProduct->name,
+                'price'         => $companyProduct->latestPrice()->price,
+                'final_price'         => $companyProduct->latestPrice()->final_price,
+                'url'         => $companyProduct->url,
+                'description' => $companyProduct->description,
+                'chart'                  => view('templates.column.chart', [
+                    'id' => 'competitor-prices-'.$companyProduct->id,
+                    'type' => 'area',
+                    'title' => [
+                        'text' => '',
+                    ],
+                    'xAxis' => [
+                        'type' => 'datetime',
+                        'dateTimeLabelFormats' => [
+                            'millisecond' => '%d-%m',
+                            'second' => '%d-%m',
+                            'minute' => '%d-%m',
+                            'hour' => '%d-%m',
+                            'day' => '%d-%m-%Y',
+                            'month' => '%m-%Y',
+                            'year' => '%m-%Y',
+                        ],
+//                        'visible' => false,
+                    ],
+                    'yAxis' => [
+                        'title' => [
+                            'text' => ''
+                        ],
+                    ],
+                    'tooltip' => [
+                        'crosshairs' => true,
+                        'shared' => true,
+                        'valueSuffix' => '€',
+                        'xDateFormat' => '%d-%m-%Y'
+                    ],
+                    'legend' => [
+                        'enabled' => false,
+                    ],
+                    'plotOptions' => [
+                        'series' => [
+                            'lineWidth' => 1,
+                            'marker' => [
+//                                'enabled' => false,
+                                'states' => [
+                                    'hover' => [
+                                        'enabled' => true,
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    'series' => [
+                        [
+                            'name' => 'Τιμή',
+                            'type'  => 'spline',
+                            'data' => CompanyProductPrice::where('product_id', $product->id)->orderBy('date','asc')->get()->map(function ($productPrice) {
+                                return [strtotime($productPrice->date) * 1000, 1 * $productPrice->final_price , $productPrice->id];
+                            })->toArray(),
+                        ],
+                    ],
+                ]),
+                'updated_at'  => date('Y-m-d',strtotime($companyProduct->updated_at)),
             ];
         }
         $data = [
@@ -162,7 +216,7 @@ class ProductController extends Controller
                     ],
                 ],
             ]),
-            'competitors'   => $product_competitors
+            'companyProducts'   => $productCompetitors
         ];
 
         return view('pages.product', $data);
@@ -494,7 +548,14 @@ class ProductController extends Controller
         $min = strtotime('01-02-2024');
         $max = strtotime('08-03-2024');
         foreach ($products as $product){
-            $prices = $product->getCompetitionPriceRange();
+            $prices = [];
+            foreach($product->getCompetitionPriceRange() as $day){
+                $prices[] = [
+                    strtotime($day['date']) * 1000,
+                    1 * $day['min'],
+                    1 * $day['max'],
+                ];
+            }
             $val = rand($min, $max);
             $date = date('d-m-Y', $val);
             $list_item = [

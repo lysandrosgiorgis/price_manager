@@ -50,6 +50,12 @@ class Product extends Model
     }
 
     public function prices(){
-        return $this->hasMany(ProductPrice::class, 'product_company_id', 'id');
+        return $this->hasMany(ProductPrice::class, 'product_id', 'id', 'company_products');
+    }
+
+    public function latestPrice()
+    {
+        $prices = $this->prices()->orderBy('date', 'desc')->first();
+        return $prices;
     }
 }
