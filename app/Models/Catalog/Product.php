@@ -13,6 +13,7 @@ class Product extends Model
 
     public function scopeFilter($query, $params)
     {
+        $query->select('products.*');
         if (isset($params['has_competitor']) && trim($params['has_competitor'] !== '')) {
             $query->leftJoin('company_products', 'products.id', '=', 'company_products.product_id');
             if($params['has_competitor'] == 1) {

@@ -76,7 +76,7 @@ class ProductController extends Controller
 
     public function info($id){
         $product      = Product::findOrFail($id);
-        $competitotrs = CompanyProduct::leftJoin('companies', 'products_companies.company_id', '=', 'companies.id')
+        $competitotrs = CompanyProduct::leftJoin('companies', 'company_products.company_id', '=', 'companies.id')
             ->select([
                 'company_products.company_id',
                 'company_products.url',
