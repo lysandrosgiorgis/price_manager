@@ -78,10 +78,10 @@ class ProductController extends Controller
         $product      = Product::findOrFail($id);
         $competitotrs = CompanyProduct::leftJoin('companies', 'products_companies.company_id', '=', 'companies.id')
             ->select([
-                'products_companies.company_id',
-                'products_companies.url',
-                'products_companies.description',
-                'products_companies.updated_at',
+                'company_products.company_id',
+                'company_products.url',
+                'company_products.description',
+                'company_products.updated_at',
                 'companies.name',
             ])
             ->where('product_id','=',$id)->get();

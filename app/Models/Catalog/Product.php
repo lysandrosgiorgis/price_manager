@@ -14,11 +14,11 @@ class Product extends Model
     public function scopeFilter($query, $params)
     {
         if (isset($params['has_competitor']) && trim($params['has_competitor'] !== '')) {
-            $query->leftJoin('products_companies', 'products.id', '=', 'products_companies.product_id');
+            $query->leftJoin('company_products', 'products.id', '=', 'company_products.product_id');
             if($params['has_competitor'] == 1) {
-                $query->where('products_companies.url','!=',NULL);
+                $query->where('company_products.url','!=',NULL);
             } else {
-                $query->where('products_companies.url','=',NULL);
+                $query->where('company_products.url','=',NULL);
             }
         }
 
