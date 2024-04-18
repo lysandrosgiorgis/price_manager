@@ -491,7 +491,7 @@ class ProductController extends Controller
                 'label' => __('Μέρες'),
                 'class' => 'align-middle',
             ],
-            'priciest'      => [
+            'highest'      => [
                 'label' => __('Ακριβότερος'),
                 'class' => 'align-middle',
             ],
@@ -542,7 +542,7 @@ class ProductController extends Controller
             'width' => '104',
         ];
         $data['list']['list_items'] = [];
-//        $products = Product::paginate($request->input('limit', 15));
+
         $products = Product::filter($data['product_filters'])->orderBy('system_last_update','desc')->paginate($request->input('limit', 15));
         $data['list']['pagination'] = $products;
         $min = strtotime('01-02-2024');
@@ -558,6 +558,43 @@ class ProductController extends Controller
             }
             $val = rand($min, $max);
             $date = date('d-m-Y', $val);
+            if($product->last_position > $product->position){
+                $change = $product->last_position - $product->position;
+                $position_icon = '<span class="fa fa-arrow-up text-success"></span>';
+            }elseif($product->last_position == $product->position){
+                $change = 0;
+                $position_icon = '';
+            }else{
+                $change = $product->position - $product->last_position;
+                $position_icon = '<span class="fa fa-arrow-down text-danger"></span>';
+            }
+            if($product->position == 1){
+                $position_class = 'text-success';
+            }elseif($product->position <= 3){
+                $position_class = 'text-warning';
+            }else{
+                $position_class = 'text-danger';
+            }
+            if($product->position == 0){
+                $lowestImage = '';
+            }else{
+                if($product->has_lowest_price){
+                    $lowestImage = asset('storage/photos/shares/karvelas/logo.png');
+                }else{
+
+                    $lowestImage = $product->getCompetitorLowest()->company->image;
+                }
+            }
+            if($product->position == 0){
+                $highestImage = '';
+            }else{
+                if($product->has_highest_price){
+                    $highestImage = asset('storage/photos/shares/karvelas/logo.png');
+                }else{
+                    $highestImage = $product->getCompetitorHighest()->company->image;
+                }
+            }
+
             $list_item = [
                 'img'                    => view('templates.column.img', [
                     'img' => ($product->image) ? $product->image : 'https://place-hold.it/200?fbclid=IwAR2x7A8JE71lW1uDy5G-Q2J23DKTPetr8p-4S-64Hwl3tDtPb5eWg19Y2n0',
@@ -576,7 +613,7 @@ class ProductController extends Controller
                             'second' => '%d-%m',
                             'minute' => '%d-%m',
                             'hour' => '%d-%m',
-                            'day' => '%m-%Y',
+                            'day' => '%d-%m',
                             'month' => '%m-%Y',
                             'year' => '%m-%Y',
                         ],
@@ -618,17 +655,23 @@ class ProductController extends Controller
                             'name' => 'Τιμή',
                             'type'  => 'spline',
                             'data' => ProductPrice::where('product_id', $product->id)->orderBy('date','asc')->get()->map(function ($productPrice) {
-                                return [strtotime($productPrice->date) * 1000, 1 * $productPrice->final_price , $productPrice->id];
+                                return [strtotime(date('Y-m-d', strtotime($productPrice->date))) * 1000, 1 * $productPrice->final_price , $productPrice->id];
                             })->toArray(),
                         ],
                     ],
                 ]),
-                'position'               => $product->position,
-                'updated_at'             => date('Y-m-d', strtotime($product->updated_at)),
-                'cheapest'               => ($product->has_lowest_price > 0) ? '<span class="fa fa-check text-success fs-3" aria-hidden="true" data-bs-toggle="tooltip" data-bs-title="Φθηνότερος"></span>' : '',
+                'position'               => $product->position ? '<span class="'.$position_class.'">'.$product->position.'</span>'.$position_icon : '-',
+                'updated_at'             => date('d-m-Y', strtotime($product->last_price_change)),
+                'cheapest'               => $lowestImage ? view('templates.column.img', [
+                    'img' => $lowestImage,
+                    'ratio' => 'ratio-16x9',
+                ]) : '',
+                'highest'               => $highestImage ? view('templates.column.img', [
+                    'img' => $highestImage,
+                    'ratio' => 'ratio-16x9',
+                ]) : '',
                 'cheapest_days'          => '',
-                'priciest'               => ($product->has_highest_price > 0) ? '<span class="fa fa-check text-success fs-3" aria-hidden="true" data-bs-toggle="tooltip" data-bs-title="Φθηνότερος"></span>' : '',
-                'competitors_no'         => '',
+                'competitors_no'         => $product->companyProducts->count(),
                 'lowest_possible_price'  => '',
                 'highest_possible_price' => '',
                 'entersoft_update'       => $product->system_last_update,
@@ -702,7 +745,7 @@ class ProductController extends Controller
             'updated_at',
             'cheapest',
             'cheapest_days',
-            'priciest',
+            'highest',
             'competitors_no',
             'lowest_possible_price',
             'highest_possible_price',

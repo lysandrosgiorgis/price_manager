@@ -58,4 +58,11 @@ class Product extends Model
         $prices = $this->prices()->orderBy('date', 'desc')->first();
         return $prices;
     }
+
+    public function getPrice($date = null ){
+        if(!$date) $date = date('Y-m-d');
+        $prices = ProductPrice::where('product_id', '=', $this->id)->whereDate('date', '=', $date)->first();
+
+        return $prices;
+    }
 }

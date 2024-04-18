@@ -58,6 +58,21 @@ class Product extends Model
         return $this->hasMany(ProductPrice::class);
     }
 
+    public function getPrice($date = null ){
+        if(!$date) $date = date('Y-m-d');
+        $prices = ProductPrice::where('product_id', '=', $this->id)->whereDate('date', '=', $date)->first();
+
+        return $prices;
+    }
+
+    public function getCompetitorLowest(){
+        return $this->companyProducts->sortBy('position')->first();
+    }
+
+    public function getCompetitorHighest(){
+        return $this->companyProducts->sortBy('position')->first();
+    }
+
     public function getCompetitionPriceRange(){
         $companyProducts = $this->companyProducts->pluck('id')->toArray();
         $prices = CompanyProductPrice::selectRaw('DATE(`date`) as `date`, MIN(price) as min, MAX(price) as max')->whereIn('product_id', $companyProducts)->groupBy('date')->get();
