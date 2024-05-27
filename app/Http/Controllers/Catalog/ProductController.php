@@ -353,7 +353,7 @@ class ProductController extends Controller
                                 'label' 	=> __('Image'),
                                 'wide' 		=> 1,
                                 'type' 		=> 'image',
-                                'value' 	=> old('image', $product ? $product->image : $defaults['image'] ),
+                                'value' 	=> old('image', $product ? 'storage/'.$product->image : $defaults['image'] ),
                                 'error'     => '',
                             ],
                             [
@@ -598,7 +598,7 @@ class ProductController extends Controller
 
             $list_item = [
                 'img'                    => view('templates.column.img', [
-                    'img' => ($product->image) ? 'storage/'.$product->image : 'https://place-hold.it/200?fbclid=IwAR2x7A8JE71lW1uDy5G-Q2J23DKTPetr8p-4S-64Hwl3tDtPb5eWg19Y2n0',
+                    'img' => ($product->image) ? asset('storage/'.$product->image) : 'https://place-hold.it/200?fbclid=IwAR2x7A8JE71lW1uDy5G-Q2J23DKTPetr8p-4S-64Hwl3tDtPb5eWg19Y2n0',
                 ]),
                 'name'                   => $product->name,
                 'chart'                  => view('templates.column.chart', [
