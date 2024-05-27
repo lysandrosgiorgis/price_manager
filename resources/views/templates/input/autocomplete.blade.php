@@ -23,6 +23,6 @@
 <script>
 
     document.addEventListener('DOMContentLoaded', function() {
-        autocomplete(document.getElementById("{{ $input['id'] }}-source"), document.getElementById("{{ $input['id'] }}-target"));
+        window.autocomplete(document.getElementById("{{ $input['id'] }}-source"), document.getElementById("{{ $input['id'] }}-target"));
     });
 </script>

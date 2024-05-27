@@ -129,8 +129,12 @@ class ScrapeCategories extends Command{
                     $ext = pathinfo($product->image, PATHINFO_EXTENSION);
                     $imagePath = storage_path('app/public/photos/shares/electrocrete/products/'.$sku.'.'.$ext);
                     if(!file_exists($imagePath)){
-                        $imageContent = file_get_contents($product->image);
-                        Storage::disk('public')->put('photos/shares/electrocrete/products/'.$sku.'.'.$ext, $imageContent);
+                        try{
+                            $imageContent = file_get_contents($product->image);
+                            Storage::disk('public')->put('photos/shares/electrocrete/products/'.$sku.'.'.$ext, $imageContent);
+                        }catch (\Exception $e) {
+                            $this->error($e->getMessage());
+                        }
                     }
                     $product->image = 'photos/shares/electrocrete/products/'.$sku.'.'.$ext;
                     $product->save();

@@ -5,6 +5,9 @@ namespace App\Console\Commands\Karvelas;
 use App\Models\Catalog\Product;
 use App\Models\Catalog\ProductPrice;
 use Illuminate\Console\Command;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Storage;
+
 use App\Models\Api\Entersoft;
 
 class UpdateProducts extends Command{
@@ -22,6 +25,11 @@ class UpdateProducts extends Command{
         $enterSoftApi = new EnterSoft;
         $this->line('Call get Products');
         $response = $enterSoftApi->getProducts(date('Y-m-d H:i:s', strtotime('-24 months')));
+//        $response = $enterSoftApi->getProducts(date('Y-m-d H:i:s', strtotime('-1 days')));
+//        echo '<pre>';
+//        print_r($response);
+//        echo '</pre>';
+//        die();
         $this->line('Got them');
 
         $bar = $this->output->createProgressBar($response['Count']);
@@ -63,7 +71,20 @@ class UpdateProducts extends Command{
             $images = explode(',', $result['Photos']);
             if(!empty(trim($images[0]))){
                 $product->image = trim($images[0]);
+                $ext = pathinfo($product->image, PATHINFO_EXTENSION);
+                $imagePath = storage_path('app/public/photos/shares/karvelas/products/'.$result['fCatalogueItemGID'].'.'.$ext);
+                if(!file_exists($imagePath)){
+                    try{
+                        $imageContent = file_get_contents('https://guruelectrics.gr/'.$product->image);
+                        Storage::disk('public')->put('photos/shares/karvelas/products/'.$result['fCatalogueItemGID'].'.'.$ext, $imageContent);
+                    }catch (\Exception $e) {
+                        $this->error($e->getMessage());
+                    }
+                }else{
+                    $product->image = 'photos/shares/karvelas/products/'.$result['fCatalogueItemGID'].'.'.$ext;
+                }
             }
+
             $product->sku = $result['SKU'];
             $product->system_last_update = date('Y-m-d H:i:s', strtotime($result['Last_Update']));
 //            $this->line('before save product');

@@ -84,7 +84,7 @@ class HomeController extends Controller
         foreach($lowest_products as $product) {
             $company = Company::where('id','=',$product->company_id)->first();
             $data['lowest_products'][$product->id] = [
-                'image'            => ($product->image) ? $product->image : 'https://place-hold.it/200?fbclid=IwAR2x7A8JE71lW1uDy5G-Q2J23DKTPetr8p-4S-64Hwl3tDtPb5eWg19Y2n0',
+                'image'            => ($product->image) ? asset('storage/'.$product->image) : 'https://place-hold.it/200?fbclid=IwAR2x7A8JE71lW1uDy5G-Q2J23DKTPetr8p-4S-64Hwl3tDtPb5eWg19Y2n0',
                 'link'             => 'catalog/product/info/'.$product->id,
                 'name'             => $product->name,
                 'competitors'      => $company ? $company->name : '',
@@ -98,7 +98,7 @@ class HomeController extends Controller
         foreach($highest_products as $product) {
             $company = Company::where('id','=',$product->company_id)->first();
             $data['highest_products'][$product->id] = [
-                'image'            => ($product->image) ? $product->image : 'https://place-hold.it/200?fbclid=IwAR2x7A8JE71lW1uDy5G-Q2J23DKTPetr8p-4S-64Hwl3tDtPb5eWg19Y2n0',
+                'image'            => ($product->image) ? asset('storage/'.$product->image) : 'https://place-hold.it/200?fbclid=IwAR2x7A8JE71lW1uDy5G-Q2J23DKTPetr8p-4S-64Hwl3tDtPb5eWg19Y2n0',
                 'link'             => 'catalog/product/info/'.$product->id,
                 'name'             => $product->name,
                 'competitors'      => $company ? $company->name : '',
@@ -113,7 +113,7 @@ class HomeController extends Controller
             $company = Company::where('id', '=', $product->company_id)->first() ;
             if (!$company) continue;
             $data['no_competitor_products'][$product->id] = [
-                'image'            => ($product->image) ? $product->image : 'https://place-hold.it/200?fbclid=IwAR2x7A8JE71lW1uDy5G-Q2J23DKTPetr8p-4S-64Hwl3tDtPb5eWg19Y2n0',
+                'image'            => ($product->image) ? asset('storage/'.$product->image) : 'https://place-hold.it/200?fbclid=IwAR2x7A8JE71lW1uDy5G-Q2J23DKTPetr8p-4S-64Hwl3tDtPb5eWg19Y2n0',
                 'link'             => 'catalog/product/info/'.$product->id,
                 'name'             => $product->name,
                 'competitors'      => $company ? $company->name : '',
@@ -128,7 +128,7 @@ class HomeController extends Controller
             $company = Company::where('id', '=', $product->company_id)->first() ;
             if (!$company) continue;
             $data['latest_update_products'][$product->id] = [
-                'image'            => ($product->image) ? $product->image : 'https://place-hold.it/200?fbclid=IwAR2x7A8JE71lW1uDy5G-Q2J23DKTPetr8p-4S-64Hwl3tDtPb5eWg19Y2n0',
+                'image'            => ($product->image) ? asset('storage/'.$product->image) : 'https://place-hold.it/200?fbclid=IwAR2x7A8JE71lW1uDy5G-Q2J23DKTPetr8p-4S-64Hwl3tDtPb5eWg19Y2n0',
                 'link'             => 'catalog/product/info/'.$product->id,
                 'name'             => $product->name,
                 'competitors'      => $company ? $company->name : '',

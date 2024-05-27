@@ -66,6 +66,18 @@ window.autocomplete = function (autocompleteSource, autocompleteTarget) {
                     var autocomplete_items = document.createElement("DIV");
                     autocomplete_items.setAttribute("class", "list-group list-group-flush autocomplete-items");
                     response = JSON.parse(response);
+
+                    var autocomplete_item = document.createElement("DIV");
+                    autocomplete_item.setAttribute('class', 'list-group-item list-group-item-action');
+                    autocomplete_item.setAttribute("data-value", 0);
+                    autocomplete_item.innerHTML = '--Remove Selection--';
+
+                    autocomplete_item.addEventListener("click", function(e) {
+                        autocompleteSource.value = this.innerHTML;
+                        autocompleteTarget.value = this.getAttribute("data-value");
+                        autocomplete_items.remove();
+                    });
+                    autocomplete_items.appendChild(autocomplete_item);
                     for(var index in response) {
                         const item = response[index];
 
@@ -141,8 +153,7 @@ window.autocomplete = function (autocompleteSource, autocompleteTarget) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    $('.price-input span')
-        .dblclick(function () {
-            $(this).parent().addClass('edit');
-        });
+    $('.price-input span').dblclick(function () {
+        $(this).parent().addClass('edit');
+    });
 });

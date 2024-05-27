@@ -21,6 +21,7 @@ class ProductController extends Controller
         'barcode' => '',
         'status' => '',
         'sync' => '',
+        'has_lowest_price' => '',
         'created_at' => '',
         'updated_at' => '',
         'sort' => '',
@@ -153,7 +154,7 @@ class ProductController extends Controller
         $data = [
             'id'             =>  $product->id,
             'name'           =>  $product->name,
-            'image'            => ($product->image) ? $product->image : 'https://place-hold.it/200?fbclid=IwAR2x7A8JE71lW1uDy5G-Q2J23DKTPetr8p-4S-64Hwl3tDtPb5eWg19Y2n0',
+            'image'            => ($product->image) ? asset('storage/'.$product->image) : 'https://place-hold.it/200?fbclid=IwAR2x7A8JE71lW1uDy5G-Q2J23DKTPetr8p-4S-64Hwl3tDtPb5eWg19Y2n0',
             'starting_price' =>  $product->starting_price,
             'final_price'    =>  $product->final_price,
             'final_from'     =>  $product->final_from,
@@ -597,7 +598,7 @@ class ProductController extends Controller
 
             $list_item = [
                 'img'                    => view('templates.column.img', [
-                    'img' => ($product->image) ? $product->image : 'https://place-hold.it/200?fbclid=IwAR2x7A8JE71lW1uDy5G-Q2J23DKTPetr8p-4S-64Hwl3tDtPb5eWg19Y2n0',
+                    'img' => ($product->image) ? asset('storage/'.$product->image) : 'https://place-hold.it/200?fbclid=IwAR2x7A8JE71lW1uDy5G-Q2J23DKTPetr8p-4S-64Hwl3tDtPb5eWg19Y2n0',
                 ]),
                 'name'                   => $product->name,
                 'chart'                  => view('templates.column.chart', [
@@ -922,7 +923,7 @@ class ProductController extends Controller
             $matching = [];
             foreach ($products as $product) {
                 $similar = similar_text(mb_strtolower($product->name), mb_strtolower($companyProduct->name));
-                if($similar > 30){
+//                if($similar > 30){
                     $matching[] = [
                         'product' => $product,
                         'id' => $companyProduct->id,
@@ -930,7 +931,7 @@ class ProductController extends Controller
                         'name2' => mb_strtolower($companyProduct->name),
                         'similar' => $similar
                     ];
-                }
+//                }
             }
             usort($matching, function($a, $b) {
                 return $a['similar'] <= $b['similar'];
@@ -948,7 +949,7 @@ class ProductController extends Controller
             $matching = [];
             foreach ($products as $product) {
                 $similar = levenshtein(mb_strtolower($product->name), mb_strtolower($companyProduct->name));
-                if($similar < 10){
+//                if($similar < 10){
                     $matching[] = [
                         'product' => $product,
                         'id' => $companyProduct->id,
@@ -956,7 +957,7 @@ class ProductController extends Controller
                         'name2' => mb_strtolower($companyProduct->name),
                         'similar' => $similar
                     ];
-                }
+//                }
             }
             usort($matching, function($a, $b) {
                 return $a['similar'] >= $b['similar'];
@@ -973,7 +974,7 @@ class ProductController extends Controller
             $matching = [];
             foreach ($products as $product) {
                 $similar = similar_text(mb_strtolower($product->name2), mb_strtolower($companyProduct->name));
-                if($similar > 30) {
+//                if($similar > 30) {
                     $matching[] = [
                         'product' => $product,
                         'id' => $companyProduct->id,
@@ -981,7 +982,7 @@ class ProductController extends Controller
                         'name2' => mb_strtolower($companyProduct->name),
                         'similar' => $similar
                     ];
-                }
+//                }
             }
             usort($matching, function($a, $b) {
                 return $a['similar'] <= $b['similar'];
@@ -999,7 +1000,7 @@ class ProductController extends Controller
             $matching = [];
             foreach ($products as $product) {
                 $similar = levenshtein(mb_strtolower($product->name2), mb_strtolower($companyProduct->name));
-                if($similar < 10) {
+//                if($similar < 10) {
                     $matching[] = [
                         'product' => $product,
                         'id' => $companyProduct->id,
@@ -1007,7 +1008,7 @@ class ProductController extends Controller
                         'name2' => mb_strtolower($companyProduct->name),
                         'similar' => $similar
                     ];
-                }
+//                }
             }
             usort($matching, function($a, $b) {
                 return $a['similar'] >= $b['similar'];
@@ -1019,6 +1020,10 @@ class ProductController extends Controller
                     break;
                 }
             }
+        }
+
+        foreach($json['matches'] as $index => $match){
+            $json['matches'][$index]->image = ($match->image) ? asset('storage/'.$match->image) : 'https://place-hold.it/200?fbclid=IwAR2x7A8JE71lW1uDy5G-Q2J23DKTPetr8p-4S-64Hwl3tDtPb5eWg19Y2n0';
         }
 
         return response()->json($json);
